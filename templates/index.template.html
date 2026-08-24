@@ -61,6 +61,31 @@
 
   .about { font-size:14px; line-height:1.7; max-width:720px; }
 
+  .controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px; }
+  .controls input[type=search] { flex:1 1 200px; min-width:170px; padding:9px 12px; border:1px solid #cfcfcf; border-radius:4px; font-size:14px; font-family:inherit; background:#ffffff; color:var(--ink); }
+  .controls input[type=search]:focus { outline:2px solid var(--green); border-color:var(--green); }
+  .controls select { padding:9px 10px; border:1px solid #cfcfcf; border-radius:4px; font-size:14px; font-family:inherit; background:#ffffff; color:var(--ink); max-width:230px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+  .chip { border:1px solid var(--green); color:#1e7a3c; background:#ffffff; border-radius:999px; padding:6px 14px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit; }
+  .chip:hover { background:rgba(0,176,80,0.10); }
+  .chip.active { background:var(--green); color:#000000; border-color:var(--green); }
+  .count { font-size:12.5px; color:var(--muted); margin:0 0 10px 0; }
+  .count b { color:#000; }
+  ul.items { list-style:none; margin:0; padding:0; }
+  ul.items li { background:#ffffff; border-left:3px solid var(--green); padding:14px 18px; margin-bottom:10px; }
+  .it-meta { font-size:11.5px; color:var(--muted); margin:0 0 4px 0; text-transform:uppercase; letter-spacing:1px; }
+  .it-meta .jur { color:#1e7a3c; font-weight:700; }
+  .it-head { margin:0 0 6px 0; font-family:Oswald,'Arial Narrow',Arial,sans-serif; font-size:17px; line-height:1.3; }
+  .it-head a { color:#000000; text-decoration:none; }
+  .it-head a:hover { color:var(--green); }
+  .it-sum { margin:0 0 8px 0; font-size:13.5px; color:var(--ink); }
+  .it-tags { font-size:11.5px; color:var(--muted); }
+  .it-tags a { color:var(--green); text-decoration:none; font-weight:600; }
+  .it-tags .tag { background:#efefef; border-radius:3px; padding:2px 7px; margin-right:6px; color:#555; }
+  .more-wrap { text-align:center; margin-top:14px; }
+  .more { border:1px solid var(--green); color:#1e7a3c; background:#fff; border-radius:4px; padding:9px 22px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .more:hover { background:rgba(0,176,80,0.10); }
+
   footer { background:#000000; margin-top:44px; padding:30px 0 36px 0; }
   footer .who { font-family:Oswald,'Arial Narrow',Arial,sans-serif; color:#ffffff; font-size:14px; margin:0 0 12px 0; }
   footer .who span { color:var(--green); }
@@ -95,6 +120,18 @@
 </div></section>
 
 <section><div class="wrap">
+  <h2 class="label">Browse All Coverage</h2>
+  <div class="controls">
+    <input type="search" id="q" placeholder="Search headlines and summaries&hellip;" aria-label="Search items">
+    <select id="jur" aria-label="Filter by jurisdiction"><option value="">All jurisdictions</option></select>
+  </div>
+  <div class="chips" id="chips"></div>
+  <p class="count" id="count"></p>
+  <ul class="items" id="items"></ul>
+  <div class="more-wrap"><button class="more" id="more" hidden>Show all matching items</button></div>
+</div></section>
+
+<section><div class="wrap">
   <h2 class="label">Archive &mdash; {{EDITION_COUNT}} Editions</h2>
   <ul class="archive">
 {{ARCHIVE_ROWS}}
@@ -112,6 +149,85 @@
   <p class="links"><a href="https://newrealmbrewing.com">newrealmbrewing.com</a> &bull; <a href="https://www.linkedin.com/company/16222962">LinkedIn</a> &bull; <a href="https://nrbc.transistor.fm">Podcast</a></p>
   <p class="updated">Updated {{UPDATED}}</p>
 </div></footer>
+
+<script id="items-data" type="application/json">{{ITEMS_JSON}}</script>
+<script>
+(function () {
+  var ITEMS = JSON.parse(document.getElementById('items-data').textContent || '[]');
+  ITEMS.sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+
+  var state = { topic: '', jur: '', q: '', limit: 25 };
+  var $q = document.getElementById('q'), $jur = document.getElementById('jur'),
+      $chips = document.getElementById('chips'), $list = document.getElementById('items'),
+      $count = document.getElementById('count'), $more = document.getElementById('more');
+
+  // Jurisdiction dropdown: Federal first, states A–Z, then anything else
+  var jurs = {};
+  ITEMS.forEach(function (it) { (it.jurisdictions || []).forEach(function (j) { jurs[j] = 1; }); });
+  var names = Object.keys(jurs);
+  names.sort(function (a, b) {
+    var fa = a === 'Federal' ? 0 : 1, fb = b === 'Federal' ? 0 : 1;
+    return fa - fb || a.localeCompare(b);
+  });
+  names.forEach(function (j) {
+    var o = document.createElement('option'); o.value = j; o.textContent = j; $jur.appendChild(o);
+  });
+
+  // Topic chips from data, ordered by frequency
+  var tcount = {};
+  ITEMS.forEach(function (it) { (it.topics || []).forEach(function (t) { tcount[t] = (tcount[t] || 0) + 1; }); });
+  var topics = Object.keys(tcount).sort(function (a, b) { return tcount[b] - tcount[a]; });
+  function chip(label, value) {
+    var b = document.createElement('button'); b.className = 'chip'; b.type = 'button';
+    b.textContent = label; b.dataset.value = value; $chips.appendChild(b); return b;
+  }
+  chip('All topics', '').classList.add('active');
+  topics.forEach(function (t) { chip(t + ' (' + tcount[t] + ')', t); });
+  $chips.addEventListener('click', function (e) {
+    var b = e.target.closest('.chip'); if (!b) return;
+    $chips.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
+    b.classList.add('active'); state.topic = b.dataset.value; state.limit = 25; renderList();
+  });
+  $jur.addEventListener('change', function () { state.jur = $jur.value; state.limit = 25; renderList(); });
+  $q.addEventListener('input', function () { state.q = $q.value.trim().toLowerCase(); state.limit = 25; renderList(); });
+  $more.addEventListener('click', function () { state.limit = Infinity; renderList(); });
+
+  function esc(s) {
+    return String(s || '').replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function matches(it) {
+    if (state.topic && (it.topics || []).indexOf(state.topic) < 0) return false;
+    if (state.jur && (it.jurisdictions || []).indexOf(state.jur) < 0) return false;
+    if (state.q) {
+      var hay = (it.headline + ' ' + it.summary + ' ' + it.source + ' ' +
+                 (it.jurisdictions || []).join(' ')).toLowerCase();
+      if (hay.indexOf(state.q) < 0) return false;
+    }
+    return true;
+  }
+  function renderList() {
+    var hits = ITEMS.filter(matches);
+    var shown = hits.slice(0, state.limit === Infinity ? hits.length : state.limit);
+    $list.innerHTML = shown.map(function (it) {
+      var tags = (it.topics || []).map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('');
+      return '<li>' +
+        '<p class="it-meta"><span class="jur">' + esc((it.jurisdictions || []).join(' / ')) + '</span>' +
+        ' &bull; ' + esc(it.source) + (it.item_date ? ' &bull; ' + esc(it.item_date) : '') + '</p>' +
+        '<h3 class="it-head"><a href="' + esc(it.url) + '" rel="noopener">' + esc(it.headline) + '</a></h3>' +
+        (it.summary ? '<p class="it-sum">' + esc(it.summary) + '</p>' : '') +
+        '<p class="it-tags">' + tags + ' <a href="' + esc(it.edition_page) + '">Vol. ' + it.vol +
+        ', Ed. ' + it.ed + ' &rarr;</a></p>' +
+        '</li>';
+    }).join('');
+    $count.innerHTML = 'Showing <b>' + shown.length + '</b> of <b>' + hits.length +
+      '</b> matching items (' + ITEMS.length + ' total)';
+    $more.hidden = shown.length >= hits.length;
+  }
+  renderList();
+})();
+</script>
 
 </body>
 </html>
