@@ -1,31 +1,28 @@
 #!/usr/bin/env python3
 """NRBC Compliance Brief site generator.
 
-Repo layout (all paths relative to repo root):
-  manifest.json                 - list of editions, oldest first
-  templates/index.template.html - landing page template
+Repo layout (paths relative to repo root):
+  manifest.json                   - list of editions, oldest first
+  items.json                      - item-level index parsed from editions (for Browse filters)
+  templates/index.template.html   - landing page template
   templates/edition.template.html - wrapper for a single edition page
-  editions/YYYY-MM-DD.html      - generated edition pages
-  index.html                    - generated landing page
+  editions/YYYY-MM-DD.html        - generated edition pages
+  index.html                      - generated landing page
 
 Commands:
-  python3 tools/generate.py add --raw <email.html> --date 2026-08-25 --vol 1 --ed 11 \
-      --subject "New Realm Compliance Brief — Vol. 1, Ed. 11 — Tue Aug 25: ..." \
-      [--episode https://share.transistor.fm/s/xxxx]
-      Wraps the raw email HTML into editions/<date>.html, appends/updates the
-      manifest entry, and regenerates index.html.
-  python3 tools/generate.py build
-      Regenerates index.html (and re-wraps any editions_raw inputs if given
-      via --raw-dir) from manifest.json.
+  add     --raw <email.html> --date YYYY-MM-DD --vol V --ed E --subject "..." [--episode URL]
+          Wraps the raw email into editions/<date>.html, updates manifest.json,
+          re-parses that edition's items into items.json, regenerates index.html.
+  build   Regenerates index.html from manifest.json + items.json.
+  reindex Re-parses ALL editions into items.json, then rebuilds index.html.
 
-Stdlib only. Idempotent: re-adding an existing date replaces that entry.
+Stdlib only. `add` is idempotent per date.
 """
 import argparse
 import html as html_mod
 import json
 import os
 import re
-import sys
 from datetime import datetime, timezone
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -34,20 +31,52 @@ WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", 
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
           "August", "September", "October", "November", "December"]
 
+US_STATES = {s.upper() for s in [
+    "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware",
+    "Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky",
+    "Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi",
+    "Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico",
+    "New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania",
+    "Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont",
+    "Virginia","Washington","West Virginia","Wisconsin","Wyoming"]}
+
+TOPIC_RULES = [
+    ("Hemp & THC", r"hemp|thc|thca|cannabis|marijuana|cannabinoid|delta-\d"),
+    ("Alcohol", r"alcohol|beer|brewer|wine|winery|spirits|distill|liquor|\bttb\b|\babc\b|cider|seltzer"),
+    ("Tariffs & Trade", r"tariff|trade (?:deal|talks|war)|retaliat|import|export"),
+    ("Taxes & Revenue", r"\btax|excise|revenue|fiscal"),
+    ("Courts & Lawsuits", r"court|lawsuit|sued?\b|suit\b|ruling|judge|injunction|appeal|litigat"),
+    ("Licensing", r"licens|permit|microbusiness"),
+    ("DTC & Distribution", r"\bdtc\b|direct-to-consumer|shipping|distribut|wholesale|self-distribution"),
+    ("Enforcement & Recalls", r"enforce|recall|crackdown|seiz|violation|complaint|raid"),
+    ("Rulemaking & Guidance", r"rulemaking|proposed rule|draft rule|guidance|comment period|files? rules|regulator"),
+]
+
+# Section labels may be authored as literal uppercase or title case with a
+# CSS text-transform, so match case-insensitively on the element text.
+SECTION_MARKERS = [
+    ("top", r"(?i)>\s*top\s+story\s*<"),
+    ("federal", r"(?i)>\s*federal\s*<"),
+    ("states", r"(?i)>\s*around\s+the\s+states\s*<"),
+    ("radar", r"(?i)>\s*on\s+the\s+radar\s*<"),
+]
+
 
 def p(*parts):
     return os.path.join(ROOT, *parts)
 
 
-def load_manifest():
-    with open(p("manifest.json"), encoding="utf-8") as f:
-        return json.load(f)
+def load_json(name, default):
+    try:
+        with open(p(name), encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return default
 
 
-def save_manifest(m):
-    m.sort(key=lambda e: e["date"])
-    with open(p("manifest.json"), "w", encoding="utf-8") as f:
-        json.dump(m, f, indent=2, ensure_ascii=False)
+def save_json(name, data):
+    with open(p(name), "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=1, ensure_ascii=False)
         f.write("\n")
 
 
@@ -62,16 +91,116 @@ def short_date(iso):
 
 
 def topic_from_subject(subject):
-    """Take the text after the 'Wkdy Mon D:' token in the email subject."""
     m = re.search(r"—\s*\w{3}\s+\w{3}\s+\d{1,2}:\s*(.+)$", subject)
     return m.group(1).strip() if m else subject
 
 
+def clean_text(fragment):
+    txt = re.sub(r"<[^>]+>", " ", fragment)
+    txt = html_mod.unescape(txt)
+    return re.sub(r"\s+", " ", txt).strip()
+
+
+def norm_jurisdiction(tok):
+    t = tok.strip()
+    up = t.upper().replace("U.S.A.", "U.S.")
+    if up in ("FEDERAL", "U.S.", "US", "UNITED STATES", "NATIONAL", "TTB", "FDA", "DEA", "USDA", "CONGRESS"):
+        return "Federal"
+    if "CANADA" in up or up in ("TRADE", "TARIFFS"):
+        return "Trade & Canada"
+    if up in ("COURTS", "LITIGATION"):
+        return None  # category token, not a jurisdiction — the topic filter covers it
+    if up in US_STATES:
+        return up.title().replace("Of", "of")
+    return t.title() if t.isupper() else t
+
+
+def classify_topics(text):
+    low = text.lower()
+    topics = [name for name, rx in TOPIC_RULES if re.search(rx, low)]
+    return topics or ["Other"]
+
+
 def extract_body(raw_html):
-    """Return the inner content of a full HTML document, or the input as-is
-    if it is already a fragment (Outlook-stored bodies are fragments)."""
     m = re.search(r"<body[^>]*>(.*)</body>", raw_html, re.S | re.I)
     return m.group(1) if m else raw_html
+
+
+def parse_items(edition_html, entry):
+    """Parse TOP STORY / FEDERAL / AROUND THE STATES items from an edition page
+    (works on both raw email bodies and wrapped edition pages)."""
+    h = edition_html
+    # section boundaries in document order
+    marks = []
+    for name, rx in SECTION_MARKERS:
+        m = re.search(rx, h)
+        if m:
+            marks.append((m.start(), name))
+    marks.sort()
+    if not marks:
+        return []
+    spans = {}
+    for i, (pos, name) in enumerate(marks):
+        end = marks[i + 1][0] if i + 1 < len(marks) else len(h)
+        spans[name] = (pos, end)
+
+    items = []
+    # Headline = an anchor styled with the Oswald display face; some editions put
+    # the font on the <p>, others on the <a> itself, so require Oswald in either tag.
+    head_rx = re.compile(r'<p([^>]*)>\s*<a href="([^"]+)"([^>]*)>(.*?)</a>', re.S)
+    meta_rx = re.compile(r'<p[^>]*#8a8a8a[^>]*>(.*?)</p>', re.S)
+    body_rx = re.compile(r'<p[^>]*#2b2b2b[^>]*>(.*?)</p>', re.S)
+    why_rx = re.compile(r'<p[^>]*#1e7a3c[^>]*>(.*?)</p>', re.S)
+
+    for section in ("top", "federal", "states"):
+        if section not in spans:
+            continue
+        s, e = spans[section]
+        chunk = h[s:e]
+        for hm in head_rx.finditer(chunk):
+            if "Oswald" not in hm.group(1) and "Oswald" not in hm.group(3):
+                continue
+            url, head_html = hm.group(2), hm.group(4)
+            headline = clean_text(head_html)
+            rest = chunk[hm.end():hm.end() + 3500]
+            mm = meta_rx.search(rest)
+            if not mm:
+                continue
+            meta = clean_text(mm.group(1))
+            parts = [x.strip() for x in re.split(r"•|•", meta)]
+            if len(parts) < 2:
+                continue
+            jur_raw, source = parts[0], parts[1]
+            item_date = parts[2] if len(parts) > 2 else ""
+            jurisdictions = [j for j in (norm_jurisdiction(t) for t in jur_raw.split("/") if t.strip()) if j]
+            if not jurisdictions:
+                jurisdictions = ["Federal"]
+            bm = body_rx.search(rest, mm.end() - mm.start() if False else 0)
+            # search for the first body paragraph AFTER the meta line
+            bm = body_rx.search(rest[mm.end():])
+            summary = clean_text(bm.group(1)) if bm else ""
+            wm = why_rx.search(rest[mm.end():])
+            why = clean_text(wm.group(1)) if wm else ""
+            if why.lower().startswith("why it matters:"):
+                why = why[len("why it matters:"):].strip()
+            items.append({
+                "date": entry["date"], "vol": entry["vol"], "ed": entry["ed"],
+                "section": section, "jurisdictions": jurisdictions, "source": source,
+                "item_date": item_date, "headline": headline, "url": url,
+                "summary": summary, "why": why,
+                "topics": classify_topics(headline + " " + summary),
+                "edition_page": f"editions/{entry['date']}.html",
+            })
+    return items
+
+
+def update_items_for(entry, edition_html):
+    items = load_json("items.json", [])
+    items = [i for i in items if i["date"] != entry["date"]]
+    items.extend(parse_items(edition_html, entry))
+    items.sort(key=lambda i: (i["date"], {"top": 0, "federal": 1, "states": 2}[i["section"]]))
+    save_json("items.json", items)
+    return items
 
 
 def render(template, mapping):
@@ -95,6 +224,7 @@ def wrap_edition(entry, raw_html):
     os.makedirs(p("editions"), exist_ok=True)
     with open(p("editions", f"{entry['date']}.html"), "w", encoding="utf-8") as f:
         f.write(page)
+    return page
 
 
 def archive_rows(manifest):
@@ -114,12 +244,14 @@ def archive_rows(manifest):
 def build_index(manifest):
     with open(p("templates", "index.template.html"), encoding="utf-8") as f:
         tpl = f.read()
+    items = load_json("items.json", [])
     latest = max(manifest, key=lambda e: e["date"])
     topic = html_mod.escape(topic_from_subject(latest["subject"]))
     listen_btn = ""
     if latest.get("episode_url"):
         listen_btn = (f'<a class="btn btn-outline" href="{latest["episode_url"]}">'
                       f"&#9654;&nbsp; Listen to the latest (~2 min)</a>")
+    items_json = json.dumps(items, ensure_ascii=False).replace("</", "<\\/")
     page = render(tpl, {
         "LATEST_META": f"Vol. {latest['vol']} &bull; Edition {latest['ed']} &bull; {pretty_date(latest['date'])}",
         "LATEST_TOPIC": topic,
@@ -127,6 +259,7 @@ def build_index(manifest):
         "LATEST_LISTEN_BTN": listen_btn,
         "ARCHIVE_ROWS": archive_rows(manifest),
         "EDITION_COUNT": str(len(manifest)),
+        "ITEMS_JSON": items_json,
         "UPDATED": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
     })
     with open(p("index.html"), "w", encoding="utf-8") as f:
@@ -144,22 +277,31 @@ def main():
     add.add_argument("--subject", required=True)
     add.add_argument("--episode", default=None)
     sub.add_parser("build")
+    sub.add_parser("reindex")
     args = ap.parse_args()
 
-    manifest = load_manifest()
+    manifest = load_json("manifest.json", [])
     if args.cmd == "add":
-        entry = {
-            "date": args.date,
-            "vol": args.vol,
-            "ed": args.ed,
-            "subject": args.subject,
-            "episode_url": args.episode,
-        }
+        entry = {"date": args.date, "vol": args.vol, "ed": args.ed,
+                 "subject": args.subject, "episode_url": args.episode}
         manifest = [e for e in manifest if e["date"] != args.date] + [entry]
+        manifest.sort(key=lambda e: e["date"])
         with open(args.raw, encoding="utf-8") as f:
             raw = f.read()
-        wrap_edition(entry, raw)
-        save_manifest(manifest)
+        page = wrap_edition(entry, raw)
+        n = len([i for i in update_items_for(entry, page) if i["date"] == entry["date"]])
+        save_json("manifest.json", manifest)
+        print(f"parsed {n} items from {entry['date']}")
+    elif args.cmd == "reindex":
+        all_items = []
+        for e in manifest:
+            with open(p("editions", f"{e['date']}.html"), encoding="utf-8") as f:
+                page = f.read()
+            got = parse_items(page, e)
+            all_items.extend(got)
+            print(f"{e['date']} (Ed. {e['ed']}): {len(got)} items")
+        all_items.sort(key=lambda i: (i["date"], {"top": 0, "federal": 1, "states": 2}[i["section"]]))
+        save_json("items.json", all_items)
     build_index(manifest)
     print(f"ok: {len(manifest)} editions; index.html regenerated")
 
