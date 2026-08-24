@@ -27,3 +27,5 @@ the ultimate durable record — this repo can be rebuilt from Sent Items at any 
 ```
 python3 tools/generate.py build
 ```
+
+_Publish flow verified end-to-end: 2026-08-24, including overwrite of existing files._
