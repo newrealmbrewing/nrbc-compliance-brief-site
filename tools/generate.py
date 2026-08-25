@@ -203,6 +203,108 @@ def update_items_for(entry, edition_html):
     return items
 
 
+
+def make_og_card(entry, headline, out_path):
+    """Render a per-edition 1200x630 OpenGraph card: masthead, Vol/Ed/date, headline.
+    Requires Pillow; caller handles failure."""
+    from PIL import Image, ImageDraw, ImageFont
+    W, H = 1200, 630
+    GREEN, WHITE, MUT, LGT, INK2 = "#00B050", "#ffffff", "#8a8a8a", "#9e9e9e", "#0a0a0a"
+    BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+    REG = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+    SQ = 0.88  # horizontal squeeze for a condensed display look
+    img = Image.new("RGB", (W, H), "#000000")
+    d = ImageDraw.Draw(img)
+    d.rectangle([0, 0, W, 14], fill=GREEN)
+
+    def condensed_img(text, size, fill, tracking=0):
+        f = ImageFont.truetype(BOLD, size)
+        tmp_w = int(sum(d.textlength(ch, font=f) + tracking for ch in text)) + 20
+        tmp = Image.new("RGBA", (tmp_w, size + 30), (0, 0, 0, 0))
+        td = ImageDraw.Draw(tmp)
+        x = 0
+        for ch in text:
+            td.text((x, 0), ch, font=f, fill=fill)
+            x += td.textlength(ch, font=f) + tracking
+        return tmp.resize((int(tmp_w * SQ), size + 30), Image.LANCZOS)
+
+    def condensed_width(text, size, tracking=0):
+        f = ImageFont.truetype(BOLD, size)
+        return (sum(d.textlength(ch, font=f) + tracking for ch in text)) * SQ
+
+    m = condensed_img("NEW REALM BREWING", 46, WHITE, tracking=1)
+    img.paste(m, (86, 46), m)
+    f_lbl = ImageFont.truetype(BOLD, 22)
+    x = 88
+    for ch in "DAILY COMPLIANCE BRIEF":
+        d.text((x, 106), ch, font=f_lbl, fill=GREEN)
+        x += d.textlength(ch, font=f_lbl) + 8
+
+    f_meta = ImageFont.truetype(BOLD, 33)
+    meta = f"Vol. {entry['vol']}, Ed. {entry['ed']}  \u2022  {pretty_date(entry['date'])}"
+    d.text((86, 172), meta, font=f_meta, fill=LGT)
+
+    usable = W - 2 * 86
+    words = headline.split()
+    chosen = None
+    lines = []
+    for size in (72, 64, 58, 52, 46, 40):
+        lines, cur = [], ""
+        for w in words:
+            t = (cur + " " + w).strip()
+            if condensed_width(t, size, 1) <= usable:
+                cur = t
+            else:
+                if cur:
+                    lines.append(cur)
+                cur = w
+        if cur:
+            lines.append(cur)
+        if len(lines) <= 3 and all(condensed_width(l, size, 1) <= usable for l in lines):
+            chosen = (size, lines)
+            break
+    if chosen is None:
+        size = 40
+        lines = lines[:3]
+        lines[-1] = lines[-1][:60].rstrip() + "\u2026"
+        chosen = (size, lines)
+    size, lines = chosen
+    y = 248
+    for line in lines:
+        li = condensed_img(line, size, WHITE, tracking=1)
+        img.paste(li, (86, y), li)
+        y += int(size * 1.22)
+
+    d.rectangle([0, 540, W, H], fill=INK2)
+    f_url = ImageFont.truetype(BOLD, 26)
+    d.text((86, 574), "compliance.newrealmbrewing.com", font=f_url, fill=GREEN)
+    f_tag = ImageFont.truetype(REG, 22)
+    t = "\u25b6  Read in 3 minutes or listen in 2"
+    d.text((W - 86 - d.textlength(t, font=f_tag), 578), t, font=f_tag, fill=MUT)
+
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    img.save(out_path, optimize=True)
+
+
+def og_image_for(entry, items=None):
+    """Generate assets/og/<date>.png for an edition; return its site-absolute URL.
+    Falls back to the generic banner if Pillow or fonts are unavailable."""
+    headline = None
+    if items:
+        tops = [i for i in items if i["date"] == entry["date"] and i["section"] == "top"]
+        if tops:
+            headline = tops[0]["headline"]
+    if not headline:
+        headline = topic_from_subject(entry["subject"])
+    out = p("assets", "og", f"{entry['date']}.png")
+    try:
+        make_og_card(entry, headline, out)
+        return f"https://compliance.newrealmbrewing.com/assets/og/{entry['date']}.png"
+    except Exception as e:
+        print(f"og card fallback ({e.__class__.__name__}: {e}) - using generic banner")
+        return "https://compliance.newrealmbrewing.com/assets/og-banner.png"
+
+
 def render(template, mapping):
     out = template
     for k, v in mapping.items():
@@ -210,12 +312,13 @@ def render(template, mapping):
     return out
 
 
-def wrap_edition(entry, raw_html):
+def wrap_edition(entry, raw_html, og_url=None):
     with open(p("templates", "edition.template.html"), encoding="utf-8") as f:
         tpl = f.read()
     body = extract_body(raw_html)
     topic = topic_from_subject(entry["subject"])
     page = render(tpl, {
+        "OG_IMAGE": og_url or "https://compliance.newrealmbrewing.com/assets/og-banner.png",
         "TITLE": html_mod.escape(f"Vol. {entry['vol']}, Ed. {entry['ed']} — {pretty_date(entry['date'])} — NRBC Compliance Brief"),
         "DESCRIPTION": html_mod.escape(topic),
         "CANONICAL": f"https://compliance.newrealmbrewing.com/editions/{entry['date']}.html",
@@ -288,10 +391,12 @@ def main():
         manifest.sort(key=lambda e: e["date"])
         with open(args.raw, encoding="utf-8") as f:
             raw = f.read()
-        page = wrap_edition(entry, raw)
+        day_items = parse_items(raw, entry)
+        og_url = og_image_for(entry, day_items)
+        page = wrap_edition(entry, raw, og_url)
         n = len([i for i in update_items_for(entry, page) if i["date"] == entry["date"]])
         save_json("manifest.json", manifest)
-        print(f"parsed {n} items from {entry['date']}")
+        print(f"parsed {n} items from {entry['date']}; og card: {og_url.rsplit('/', 1)[-1]}")
     elif args.cmd == "reindex":
         all_items = []
         for e in manifest:
