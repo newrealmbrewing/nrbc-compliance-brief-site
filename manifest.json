@@ -1,72 +1,79 @@
 [
-  {
-    "date": "2026-08-15",
-    "vol": 1,
-    "ed": 1,
-    "subject": "New Realm Compliance Brief — Vol. 1, Ed. 1 — Sat Aug 15: Virginia's 2 mg hemp THC cap takes effect",
-    "episode_url": "https://share.transistor.fm/s/dd340009"
-  },
-  {
-    "date": "2026-08-16",
-    "vol": 1,
-    "ed": 2,
-    "subject": "New Realm Compliance Brief — Vol. 1, Ed. 2 — Sun Aug 16: Hemp store closures follow Virginia's 2 mg cap",
-    "episode_url": "https://share.transistor.fm/s/8b4e7d5d"
-  },
-  {
-    "date": "2026-08-17",
-    "vol": 1,
-    "ed": 3,
-    "subject": "New Realm Compliance Brief — Vol. 1, Ed. 3 — Mon Aug 17: Missouri hemp THC drinks face November ban",
-    "episode_url": "https://share.transistor.fm/s/ffbb6793"
-  },
-  {
-    "date": "2026-08-18",
-    "vol": 1,
-    "ed": 4,
-    "subject": "New Realm Compliance Brief — Vol. 1, Ed. 4 — Tue Aug 18: 50% tariffs on Canadian beverages arrive Wednesday",
-    "episode_url": "https://share.transistor.fm/s/caaf766f"
-  },
-  {
-    "date": "2026-08-19",
-    "vol": 1,
-    "ed": 5,
-    "subject": "New Realm Compliance Brief — Vol. 1, Ed. 5 — Wed Aug 19: Trump pauses 50% Canada tariffs, citing pending deal",
-    "episode_url": "https://share.transistor.fm/s/41994bc7"
-  },
-  {
-    "date": "2026-08-20",
-    "vol": 1,
-    "ed": 6,
-    "subject": "New Realm Compliance Brief — Vol. 1, Ed. 6 — Thu Aug 20: Carney asks provinces to restock U.S. alcohol",
-    "episode_url": "https://share.transistor.fm/s/3ae4e597"
-  },
-  {
-    "date": "2026-08-21",
-    "vol": 1,
-    "ed": 7,
-    "subject": "New Realm Compliance Brief — Vol. 1, Ed. 7 — Fri Aug 21: All provinces agree to restock U.S. alcohol",
-    "episode_url": "https://share.transistor.fm/s/2d507b21"
-  },
-  {
-    "date": "2026-08-22",
-    "vol": 1,
-    "ed": 8,
-    "subject": "New Realm Compliance Brief — Vol. 1, Ed. 8 — Sat Aug 22: U.S.–Canada talks collapse; 50% tariffs take effect",
-    "episode_url": "https://share.transistor.fm/s/0711886d"
-  },
-  {
-    "date": "2026-08-23",
-    "vol": 1,
-    "ed": 9,
-    "subject": "New Realm Compliance Brief — Vol. 1, Ed. 9 — Sun Aug 23: Canada sets Sept. 8 tariff retaliation",
-    "episode_url": "https://share.transistor.fm/s/5a51db87"
-  },
-  {
-    "date": "2026-08-24",
-    "vol": 1,
-    "ed": 10,
-    "subject": "New Realm Compliance Brief — Vol. 1, Ed. 10 — Mon Aug 24: Tennessee projects $110 million hemp tax shortfall",
-    "episode_url": "https://share.transistor.fm/s/6850de9f"
-  }
+ {
+  "date": "2026-08-15",
+  "vol": 1,
+  "ed": 1,
+  "subject": "New Realm Compliance Brief — Vol. 1, Ed. 1 — Sat Aug 15: Virginia's 2 mg hemp THC cap takes effect",
+  "episode_url": "https://share.transistor.fm/s/dd340009"
+ },
+ {
+  "date": "2026-08-16",
+  "vol": 1,
+  "ed": 2,
+  "subject": "New Realm Compliance Brief — Vol. 1, Ed. 2 — Sun Aug 16: Hemp store closures follow Virginia's 2 mg cap",
+  "episode_url": "https://share.transistor.fm/s/8b4e7d5d"
+ },
+ {
+  "date": "2026-08-17",
+  "vol": 1,
+  "ed": 3,
+  "subject": "New Realm Compliance Brief — Vol. 1, Ed. 3 — Mon Aug 17: Missouri hemp THC drinks face November ban",
+  "episode_url": "https://share.transistor.fm/s/ffbb6793"
+ },
+ {
+  "date": "2026-08-18",
+  "vol": 1,
+  "ed": 4,
+  "subject": "New Realm Compliance Brief — Vol. 1, Ed. 4 — Tue Aug 18: 50% tariffs on Canadian beverages arrive Wednesday",
+  "episode_url": "https://share.transistor.fm/s/caaf766f"
+ },
+ {
+  "date": "2026-08-19",
+  "vol": 1,
+  "ed": 5,
+  "subject": "New Realm Compliance Brief — Vol. 1, Ed. 5 — Wed Aug 19: Trump pauses 50% Canada tariffs, citing pending deal",
+  "episode_url": "https://share.transistor.fm/s/41994bc7"
+ },
+ {
+  "date": "2026-08-20",
+  "vol": 1,
+  "ed": 6,
+  "subject": "New Realm Compliance Brief — Vol. 1, Ed. 6 — Thu Aug 20: Carney asks provinces to restock U.S. alcohol",
+  "episode_url": "https://share.transistor.fm/s/3ae4e597"
+ },
+ {
+  "date": "2026-08-21",
+  "vol": 1,
+  "ed": 7,
+  "subject": "New Realm Compliance Brief — Vol. 1, Ed. 7 — Fri Aug 21: All provinces agree to restock U.S. alcohol",
+  "episode_url": "https://share.transistor.fm/s/2d507b21"
+ },
+ {
+  "date": "2026-08-22",
+  "vol": 1,
+  "ed": 8,
+  "subject": "New Realm Compliance Brief — Vol. 1, Ed. 8 — Sat Aug 22: U.S.–Canada talks collapse; 50% tariffs take effect",
+  "episode_url": "https://share.transistor.fm/s/0711886d"
+ },
+ {
+  "date": "2026-08-23",
+  "vol": 1,
+  "ed": 9,
+  "subject": "New Realm Compliance Brief — Vol. 1, Ed. 9 — Sun Aug 23: Canada sets Sept. 8 tariff retaliation",
+  "episode_url": "https://share.transistor.fm/s/5a51db87"
+ },
+ {
+  "date": "2026-08-24",
+  "vol": 1,
+  "ed": 10,
+  "subject": "New Realm Compliance Brief — Vol. 1, Ed. 10 — Mon Aug 24: Tennessee projects $110 million hemp tax shortfall",
+  "episode_url": "https://share.transistor.fm/s/6850de9f"
+ },
+ {
+  "date": "2026-08-25",
+  "vol": 1,
+  "ed": 11,
+  "subject": "New Realm Compliance Brief — Vol. 1, Ed. 11 — Tue Aug 25: New Mexico businesses sue to halt tracking switch",
+  "episode_url": "https://share.transistor.fm/s/975b6df6"
+ }
 ]
