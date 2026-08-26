@@ -25,10 +25,19 @@
   .sitenav .brand span { color:#00B050; }
   .sitenav a.back { font-family:'Open Sans',Arial,Helvetica,sans-serif; font-size:13px; color:#00B050; text-decoration:none; }
   .sitenav a.back:hover { text-decoration:underline; }
+  /* Desktop presentation (2026-08-26): center the fixed-width email column
+     and scale it up on wide viewports. `zoom` scales layout+text in all
+     modern browsers; unsupported browsers just get the centered column. */
+  .brief-wrap > table { margin:0 auto; }
+  @media (min-width: 900px)  { .brief-wrap { zoom: 1.25; } }
+  @media (min-width: 1400px) { .brief-wrap { zoom: 1.5; } }
+  @media (min-width: 1900px) { .brief-wrap { zoom: 1.75; } }
 </style>
 </head>
 <body>
 <nav class="sitenav"><a class="brand" href="../">NEW REALM BREWING <span>&mdash;</span> COMPLIANCE BRIEF</a><a class="back" href="../">&larr; All editions</a></nav>
+<div class="brief-wrap">
 {{EDITION_BODY}}
+</div>
 </body>
 </html>
