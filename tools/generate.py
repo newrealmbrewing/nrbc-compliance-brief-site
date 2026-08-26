@@ -286,7 +286,19 @@ def render(template, mapping):
     return out
 
 
-def wrap_edition(entry, raw_html, og_url=None):
+def transcript_section(transcript_text):
+    """Collapsible audio-transcript card appended below the brief (2026-08-26).
+    The narration script is the verbatim transcript — the audio is synthesized
+    from it — so no speech-to-text is involved."""
+    if not transcript_text or not transcript_text.strip():
+        return ""
+    paras = [f"<p>{html_mod.escape(par.strip())}</p>"
+             for par in re.split(r"\n\s*\n", transcript_text.strip()) if par.strip()]
+    return ('<details class="transcript"><summary>Audio transcript (~2 min read)</summary>'
+            + "\n".join(paras) + "</details>")
+
+
+def wrap_edition(entry, raw_html, og_url=None, transcript_text=None):
     with open(p("templates", "edition.template.html"), encoding="utf-8") as f:
         tpl = f.read()
     body = extract_body(raw_html)
@@ -297,6 +309,7 @@ def wrap_edition(entry, raw_html, og_url=None):
         "DESCRIPTION": html_mod.escape(topic),
         "CANONICAL": f"https://compliance.newrealmbrewing.com/editions/{entry['date']}.html",
         "EDITION_BODY": body,
+        "TRANSCRIPT_SECTION": transcript_section(transcript_text),
     })
     os.makedirs(p("editions"), exist_ok=True)
     with open(p("editions", f"{entry['date']}.html"), "w", encoding="utf-8") as f:
@@ -353,6 +366,9 @@ def main():
     add.add_argument("--ed", type=int, required=True)
     add.add_argument("--subject", required=True)
     add.add_argument("--episode", default=None)
+    add.add_argument("--transcript", default=None,
+                     help="path to the narration script (verbatim audio transcript); "
+                          "adds a collapsible Transcript section to the edition page")
     sub.add_parser("build")
     sub.add_parser("reindex")
     args = ap.parse_args()
@@ -367,7 +383,14 @@ def main():
             raw = f.read()
         day_items = parse_items(raw, entry)
         og_url = og_image_for(entry, day_items)
-        page = wrap_edition(entry, raw, og_url)
+        transcript = None
+        if args.transcript:
+            try:
+                with open(args.transcript, encoding="utf-8") as f:
+                    transcript = f.read()
+            except OSError as e:
+                print(f"transcript skipped ({e.__class__.__name__}: {e})")
+        page = wrap_edition(entry, raw, og_url, transcript)
         n = len([i for i in update_items_for(entry, page) if i["date"] == entry["date"]])
         save_json("manifest.json", manifest)
         print(f"parsed {n} items from {entry['date']}; og card: {og_url.rsplit('/', 1)[-1]}")
