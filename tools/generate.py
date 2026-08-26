@@ -205,8 +205,12 @@ def update_items_for(entry, edition_html):
 
 
 def make_og_card(entry, headline, out_path):
-    """Render a per-edition 1200x630 OpenGraph card: masthead, Vol/Ed/date, headline.
-    Requires Pillow; caller handles failure."""
+    """Render a per-edition 1200x630 OpenGraph card as a brand tile: masthead,
+    tagline, large Vol/Ed, date. No headline text — LinkedIn's desktop feed
+    shows this image at ~140px where body text is unreadable (redesign
+    2026-08-26, approved by Jeremy); the headline renders as the link card's
+    title text on every platform anyway. Requires Pillow; caller handles
+    failure. The headline parameter is kept for interface stability."""
     from PIL import Image, ImageDraw, ImageFont
     W, H = 1200, 630
     GREEN, WHITE, MUT, LGT, INK2 = "#00B050", "#ffffff", "#8a8a8a", "#9e9e9e", "#0a0a0a"
@@ -215,7 +219,6 @@ def make_og_card(entry, headline, out_path):
     SQ = 0.88  # horizontal squeeze for a condensed display look
     img = Image.new("RGB", (W, H), "#000000")
     d = ImageDraw.Draw(img)
-    d.rectangle([0, 0, W, 14], fill=GREEN)
 
     def condensed_img(text, size, fill, tracking=0):
         f = ImageFont.truetype(BOLD, size)
@@ -232,55 +235,26 @@ def make_og_card(entry, headline, out_path):
         f = ImageFont.truetype(BOLD, size)
         return (sum(d.textlength(ch, font=f) + tracking for ch in text)) * SQ
 
-    m = condensed_img("NEW REALM BREWING", 46, WHITE, tracking=1)
-    img.paste(m, (86, 46), m)
-    f_lbl = ImageFont.truetype(BOLD, 22)
-    x = 88
+    d.rectangle([0, 0, W, 18], fill=GREEN)
+    m = condensed_img("NEW REALM BREWING", 92, WHITE, tracking=2)
+    img.paste(m, (86, 84), m)
+    f_lbl = ImageFont.truetype(BOLD, 34)
+    x = 90
     for ch in "DAILY COMPLIANCE BRIEF":
-        d.text((x, 106), ch, font=f_lbl, fill=GREEN)
-        x += d.textlength(ch, font=f_lbl) + 8
+        d.text((x, 204), ch, font=f_lbl, fill=GREEN)
+        x += d.textlength(ch, font=f_lbl) + 12
 
-    f_meta = ImageFont.truetype(BOLD, 33)
-    meta = f"Vol. {entry['vol']}, Ed. {entry['ed']}  \u2022  {pretty_date(entry['date'])}"
-    d.text((86, 172), meta, font=f_meta, fill=LGT)
+    v = condensed_img(f"Vol. {entry['vol']}  \u2022  Ed. {entry['ed']}", 82, WHITE, tracking=1)
+    img.paste(v, (86, 300), v)
+    dt = condensed_img(pretty_date(entry["date"]), 54, LGT, tracking=1)
+    img.paste(dt, (86, 412), dt)
 
-    usable = W - 2 * 86
-    words = headline.split()
-    chosen = None
-    lines = []
-    for size in (72, 64, 58, 52, 46, 40):
-        lines, cur = [], ""
-        for w in words:
-            t = (cur + " " + w).strip()
-            if condensed_width(t, size, 1) <= usable:
-                cur = t
-            else:
-                if cur:
-                    lines.append(cur)
-                cur = w
-        if cur:
-            lines.append(cur)
-        if len(lines) <= 3 and all(condensed_width(l, size, 1) <= usable for l in lines):
-            chosen = (size, lines)
-            break
-    if chosen is None:
-        size = 40
-        lines = lines[:3]
-        lines[-1] = lines[-1][:60].rstrip() + "\u2026"
-        chosen = (size, lines)
-    size, lines = chosen
-    y = 248
-    for line in lines:
-        li = condensed_img(line, size, WHITE, tracking=1)
-        img.paste(li, (86, y), li)
-        y += int(size * 1.22)
-
-    d.rectangle([0, 540, W, H], fill=INK2)
-    f_url = ImageFont.truetype(BOLD, 26)
-    d.text((86, 574), "compliance.newrealmbrewing.com", font=f_url, fill=GREEN)
-    f_tag = ImageFont.truetype(REG, 22)
-    t = "\u25b6  Read in 3 minutes or listen in 2"
-    d.text((W - 86 - d.textlength(t, font=f_tag), 578), t, font=f_tag, fill=MUT)
+    d.rectangle([0, 532, W, H], fill=INK2)
+    f_url = ImageFont.truetype(BOLD, 28)
+    d.text((86, 570), "compliance.newrealmbrewing.com", font=f_url, fill=GREEN)
+    f_tag = ImageFont.truetype(REG, 24)
+    t = "\u25b6  Read in 3 min or listen in 2"
+    d.text((W - 86 - d.textlength(t, font=f_tag), 572), t, font=f_tag, fill=MUT)
 
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     img.save(out_path, optimize=True)
