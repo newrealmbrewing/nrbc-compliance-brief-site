@@ -25,6 +25,7 @@
   .sitenav .brand span { color:#00B050; }
   .sitenav a.back { font-family:'Open Sans',Arial,Helvetica,sans-serif; font-size:13px; color:#00B050; text-decoration:none; }
   .sitenav a.back:hover { text-decoration:underline; }
+  html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
   /* Desktop presentation (2026-08-26): center the fixed-width email column
      and scale it up on wide viewports. `zoom` scales layout+text in all
      modern browsers; unsupported browsers just get the centered column. */
@@ -32,6 +33,26 @@
   @media (min-width: 900px)  { .brief-wrap { zoom: 1.25; } }
   @media (min-width: 1400px) { .brief-wrap { zoom: 1.5; } }
   @media (min-width: 1900px) { .brief-wrap { zoom: 1.75; } }
+  /* Mobile presentation (2026-08-27): the brief is an Outlook-safe email with
+     inline styles and a fixed 620px column, so on small screens the wrapper
+     page reflows it — fluid column, stacked header, trimmed side padding —
+     using !important to outrank the inline email styles. */
+  @media (max-width: 700px) {
+    .brief-wrap > table > tbody > tr > td { padding:10px 0 !important; }
+    .brief-wrap table[width="620"], .brief-wrap table[style*="620px"] { width:100% !important; }
+    .brief-wrap td[style*="32px"] { padding-left:18px !important; padding-right:18px !important; }
+    .brief-wrap td[style*="vertical-align:middle"] { display:block; width:auto !important; text-align:left !important; }
+    .brief-wrap table[align="right"] { float:none !important; margin:14px 0 2px 0 !important; }
+    .brief-wrap img { max-width:100%; height:auto; }
+    details.transcript { padding:18px 18px 8px 18px; }
+  }
+  /* Audio transcript card (2026-08-26): the narration script is the verbatim
+     transcript of the episode; collapsed by default below the brief. */
+  details.transcript { max-width:620px; margin:0 auto 40px auto; background:#ffffff; padding:18px 32px 8px 32px; box-sizing:border-box; }
+  details.transcript summary { cursor:pointer; font-family:'Open Sans',Arial,Helvetica,sans-serif; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:#00B050; padding-bottom:10px; }
+  details.transcript[open] summary { border-bottom:2px solid #000000; margin-bottom:6px; }
+  details.transcript p { font-family:'Open Sans',Arial,Helvetica,sans-serif; font-size:14px; color:#2b2b2b; line-height:21px; }
+  details.transcript p:last-child { padding-bottom:14px; }
 </style>
 </head>
 <body>
