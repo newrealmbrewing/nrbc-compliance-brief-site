@@ -26,6 +26,7 @@ import re
 from datetime import datetime, timezone
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SITE = "https://compliance.newrealmbrewing.com"
 
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
@@ -298,16 +299,100 @@ def transcript_section(transcript_text):
             + "\n".join(paras) + "</details>")
 
 
-def wrap_edition(entry, raw_html, og_url=None, transcript_text=None):
+def edition_title(entry):
+    """Headline-first page title (SEO pass 2026-09-02): lead with the top story
+    people would actually search for, keep the brand and edition identity after."""
+    topic = topic_from_subject(entry["subject"])
+    d = datetime.strptime(entry["date"], "%Y-%m-%d")
+    return (f"{topic} — NRBC Compliance Brief Vol. {entry['vol']}, "
+            f"Ed. {entry['ed']} ({MONTHS[d.month - 1][:3]} {d.day}, {d.year})")
+
+
+def edition_description(entry, day_items):
+    """Meta description built from the day's parsed items: top story plus the
+    next headlines, capped near what search results display."""
+    tops = [i for i in day_items if i["section"] == "top"]
+    rest = [i for i in day_items if i["section"] != "top"]
+    parts = []
+    if tops:
+        parts.append(tops[0]["headline"].rstrip("."))
+    more = "; ".join(i["headline"].rstrip(".") for i in rest[:2])
+    if more:
+        parts.append("Also: " + more)
+    desc = ". ".join(parts)
+    if not desc:
+        desc = topic_from_subject(entry["subject"])
+    tail = " Daily alcohol and hemp/THC regulatory brief — federal and all 50 states."
+    if len(desc) + len(tail) <= 300:
+        desc += "." if not desc.endswith(".") else ""
+        desc += tail
+    return desc[:300]
+
+
+def edition_published_iso(date_iso):
+    """7:00 AM America/New_York on the edition date, with correct UTC offset."""
+    try:
+        from zoneinfo import ZoneInfo
+        d = datetime.strptime(date_iso, "%Y-%m-%d").replace(
+            hour=7, tzinfo=ZoneInfo("America/New_York"))
+        return d.isoformat()
+    except Exception:
+        return f"{date_iso}T07:00:00-05:00"
+
+
+def edition_jsonld(entry, og_url, description):
+    published = edition_published_iso(entry["date"])
+    data = {
+        "@context": "https://schema.org",
+        "@type": "NewsArticle",
+        "headline": topic_from_subject(entry["subject"]),
+        "alternativeHeadline": f"NRBC Compliance Brief Vol. {entry['vol']}, Ed. {entry['ed']}",
+        "description": description,
+        "datePublished": published,
+        "dateModified": published,
+        "image": [og_url or f"{SITE}/assets/og-banner.png"],
+        "mainEntityOfPage": f"{SITE}/editions/{entry['date']}.html",
+        "isAccessibleForFree": True,
+        "author": {"@type": "Organization", "name": "New Realm Brewing",
+                   "url": "https://newrealmbrewing.com"},
+        "publisher": {"@type": "Organization", "name": "New Realm Brewing",
+                      "logo": {"@type": "ImageObject", "url": f"{SITE}/assets/og-banner.png"}},
+        "isPartOf": {"@type": "WebSite", "name": "NRBC Compliance Brief", "url": SITE + "/"},
+    }
+    if entry.get("episode_url"):
+        data["associatedMedia"] = {"@type": "AudioObject", "name": "Audio edition (~2 min)",
+                                   "url": entry["episode_url"]}
+    payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+    return f'<script type="application/ld+json">{payload}</script>'
+
+
+def write_sitemap(manifest):
+    """sitemap.xml: landing page plus every edition page (SEO pass 2026-09-02)."""
+    latest = max((e["date"] for e in manifest), default=None)
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>',
+             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    if latest:
+        lines.append(f"<url><loc>{SITE}/</loc><lastmod>{latest}</lastmod><changefreq>daily</changefreq></url>")
+    for e in sorted(manifest, key=lambda x: x["date"]):
+        lines.append(f"<url><loc>{SITE}/editions/{e['date']}.html</loc><lastmod>{e['date']}</lastmod></url>")
+    lines.append("</urlset>")
+    with open(p("sitemap.xml"), "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    return len(manifest) + (1 if latest else 0)
+
+
+def wrap_edition(entry, raw_html, og_url=None, transcript_text=None, day_items=None):
     with open(p("templates", "edition.template.html"), encoding="utf-8") as f:
         tpl = f.read()
     body = extract_body(raw_html)
-    topic = topic_from_subject(entry["subject"])
+    description = edition_description(entry, day_items or [])
     page = render(tpl, {
         "OG_IMAGE": og_url or "https://compliance.newrealmbrewing.com/assets/og-banner.png",
-        "TITLE": html_mod.escape(f"Vol. {entry['vol']}, Ed. {entry['ed']} — {pretty_date(entry['date'])} — NRBC Compliance Brief"),
-        "DESCRIPTION": html_mod.escape(topic),
+        "TITLE": html_mod.escape(edition_title(entry)),
+        "DESCRIPTION": html_mod.escape(description),
         "CANONICAL": f"https://compliance.newrealmbrewing.com/editions/{entry['date']}.html",
+        "PUBLISHED": edition_published_iso(entry["date"]),
+        "JSONLD": edition_jsonld(entry, og_url, description),
         "EDITION_BODY": body,
         "TRANSCRIPT_SECTION": transcript_section(transcript_text),
     })
@@ -371,6 +456,7 @@ def main():
                           "adds a collapsible Transcript section to the edition page")
     sub.add_parser("build")
     sub.add_parser("reindex")
+    sub.add_parser("rebuild")
     args = ap.parse_args()
 
     manifest = load_json("manifest.json", [])
@@ -390,10 +476,35 @@ def main():
                     transcript = f.read()
             except OSError as e:
                 print(f"transcript skipped ({e.__class__.__name__}: {e})")
-        page = wrap_edition(entry, raw, og_url, transcript)
+        page = wrap_edition(entry, raw, og_url, transcript, day_items)
         n = len([i for i in update_items_for(entry, page) if i["date"] == entry["date"]])
         save_json("manifest.json", manifest)
         print(f"parsed {n} items from {entry['date']}; og card: {og_url.rsplit('/', 1)[-1]}")
+    elif args.cmd == "rebuild":
+        # Re-wrap every existing edition page with the current template
+        # (SEO pass 2026-09-02) — the wrapped page is the source since raw
+        # emails are not stored in the repo.
+        items = load_json("items.json", [])
+        for e in manifest:
+            with open(p("editions", f"{e['date']}.html"), encoding="utf-8") as f:
+                old = f.read()
+            m = re.search(r'<div class="brief-wrap">\s*(.*?)\s*</div>\s*</body>', old, re.S)
+            if not m:
+                print(f"{e['date']}: brief-wrap not found, skipped")
+                continue
+            inner = m.group(1)
+            tm = re.search(r"<details class=\"transcript\">.*?</details>", inner, re.S)
+            transcript = None
+            if tm:
+                paras = re.findall(r"<p>(.*?)</p>", tm.group(0), re.S)
+                transcript = "\n\n".join(html_mod.unescape(x) for x in paras)
+                inner = inner.replace(tm.group(0), "").strip()
+            og_file = p("assets", "og", f"{e['date']}.png")
+            og_url = (f"{SITE}/assets/og/{e['date']}.png" if os.path.exists(og_file)
+                      else f"{SITE}/assets/og-banner.png")
+            day_items = [i for i in items if i["date"] == e["date"]]
+            wrap_edition(e, inner, og_url, transcript, day_items)
+            print(f"{e['date']} (Ed. {e['ed']}): rebuilt ({len(day_items)} items in description)")
     elif args.cmd == "reindex":
         all_items = []
         for e in manifest:
@@ -405,7 +516,8 @@ def main():
         all_items.sort(key=lambda i: (i["date"], {"top": 0, "federal": 1, "states": 2}[i["section"]]))
         save_json("items.json", all_items)
     build_index(manifest)
-    print(f"ok: {len(manifest)} editions; index.html regenerated")
+    n_urls = write_sitemap(manifest)
+    print(f"ok: {len(manifest)} editions; index.html regenerated; sitemap: {n_urls} urls")
 
 
 if __name__ == "__main__":
