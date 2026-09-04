@@ -1647,5 +1647,69 @@
    "Licensing"
   ],
   "edition_page": "editions/2026-09-03.html"
+ },
+ {
+  "date": "2026-09-04",
+  "vol": 1,
+  "ed": 21,
+  "section": "top",
+  "jurisdictions": [
+   "New Mexico"
+  ],
+  "source": "KUNM",
+  "item_date": "Sep 1",
+  "headline": "New Mexico's tracking cutover hits its final deadline today — with the court challenge still undecided",
+  "url": "https://www.kunm.org/public-health-new-mexico/2026-09-01/cannabis-lawsuit-legal-challenge-new-mexico-tracking-system",
+  "summary": "Today is the day New Mexico retailers lose access to the state's outgoing BioTrack system, completing the forced cutover to the new state-built NMS2S seed-to-sale platform. At an Aug. 31 hearing on the industry's bid to halt the transition, Second District Judge Joshua Allison declined to rule immediately, saying he would first observe how the new system performs for retailers; the Cannabis Association of New Mexico said the shutdown period had already interrupted sales, with executive director Matt Kennicott saying affected operators went days with \"no cash flow.\" The state's BioTrack contract expires Sept. 15.",
+  "why": "From today, New Mexico retail partners must run all inventory, manifests and sales reporting in NMS2S — and with the litigation unresolved, requirements could still shift on short notice, so keep exported BioTrack records reconciled and on hand.",
+  "topics": [
+   "Hemp & THC",
+   "Courts & Lawsuits"
+  ],
+  "edition_page": "editions/2026-09-04.html"
+ },
+ {
+  "date": "2026-09-04",
+  "vol": 1,
+  "ed": 21,
+  "section": "states",
+  "jurisdictions": [
+   "California"
+  ],
+  "source": "Marijuana Moment",
+  "item_date": "Sep 2",
+  "headline": "California reports $8.4 billion in cannabis tax revenue as state announces enforcement seizures",
+  "url": "https://www.marijuanamoment.net/california-has-generated-8-4-billion-in-marijuana-tax-revenue-governor-announces",
+  "summary": "Gov. Gavin Newsom announced the state has collected $8.4 billion in cannabis taxes since legalization — nearly $4.5 billion in excise and about $3.4 billion in sales tax, including $261.7 million in Q2 2026 — and officials said August enforcement operations seized $13.3 million in illicit marijuana and tobacco products. Newsom said the state is \"going after the illicit operators\" who undermine the legal market; CDTFA director Trista Gonzalez said the seizures protect \"law-abiding licensed businesses.\"",
+  "why": "Converted and synthetically derived cannabinoids are the same product category at the center of the federal hemp-ban debate — state-level enforcement is already active, so ingredient-sourcing documentation from suppliers is worth confirming now.",
+  "topics": [
+   "Hemp & THC",
+   "Taxes & Revenue",
+   "Licensing",
+   "Enforcement & Recalls"
+  ],
+  "edition_page": "editions/2026-09-04.html"
+ },
+ {
+  "date": "2026-09-04",
+  "vol": 1,
+  "ed": 21,
+  "section": "states",
+  "jurisdictions": [
+   "Missouri"
+  ],
+  "source": "Missouri DHSS",
+  "item_date": "Sep 2",
+  "headline": "Missouri recalls licensed manufacturer's products over chemically modified and synthetic cannabinoids",
+  "url": "https://health.mo.gov/safety/cannabis/recalls.php",
+  "summary": "The state's Division of Cannabis Regulation issued a public recall of products from GF Extraction Lab LLC, saying they \"contain cannabinoids produced through chemical modification, conversion, or synthetic derivation of cannabinoids.\"",
+  "why": "Converted and synthetically derived cannabinoids are the same product category at the center of the federal hemp-ban debate — state-level enforcement is already active, so ingredient-sourcing documentation from suppliers is worth confirming now.",
+  "topics": [
+   "Hemp & THC",
+   "Courts & Lawsuits",
+   "Licensing",
+   "Enforcement & Recalls"
+  ],
+  "edition_page": "editions/2026-09-04.html"
  }
 ]
