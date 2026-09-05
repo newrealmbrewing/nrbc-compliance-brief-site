@@ -1711,5 +1711,85 @@
    "Enforcement & Recalls"
   ],
   "edition_page": "editions/2026-09-04.html"
+ },
+ {
+  "date": "2026-09-05",
+  "vol": 1,
+  "ed": 22,
+  "section": "top",
+  "jurisdictions": [
+   "New Mexico"
+  ],
+  "source": "KUNM",
+  "item_date": "Sep 4",
+  "headline": "New Mexico retailers report six-figure losses after tracking-system cutover; court challenge withdrawn to be refiled with damages",
+  "url": "https://www.kunm.org/public-health-new-mexico/2026-09-04/cannabis-retailers-businesses-lose-money-new-tracking-system",
+  "summary": "New Mexico's switch from BioTrack to the state-built NMS2S seed-to-sale system took effect this week, and operators report immediate problems: one retailer said $460,000 of inventory was miscategorized, another said roughly 50,000 items failed to transfer, and businesses described hiring staff solely to correct errors and calculating taxes manually. Cannabis Association of New Mexico executive director Matt Kennicott said \"there's a lot of things either missing or unrealistic\" for operations, and High Desert Relief COO Sabrina Aragon rated the system's functionality at \"probably a 4-out-of-10.\" The association temporarily withdrew its emergency challenge before Judge Joshua Allison and said it plans to refile next week with documented financial damages.",
+  "why": "Anyone selling into New Mexico's regulated channel should reconcile inventory records against NMS2S now and document cutover-related losses — manual tax workarounds carry reporting risk, and the refiled case may turn on quantified damages.",
+  "topics": [
+   "Hemp & THC",
+   "Taxes & Revenue",
+   "Courts & Lawsuits"
+  ],
+  "edition_page": "editions/2026-09-05.html"
+ },
+ {
+  "date": "2026-09-05",
+  "vol": 1,
+  "ed": 22,
+  "section": "federal",
+  "jurisdictions": [
+   "Federal"
+  ],
+  "source": "FDA / Federal Register",
+  "item_date": "Sep 4",
+  "headline": "FDA opens 60-day comment period on botanical drug product development",
+  "url": "https://www.fda.gov/news-events/press-announcements/fda-seeks-public-input-advance-development-botanical-drug-products",
+  "summary": "FDA published a request for information in Friday's Federal Register seeking input on barriers to developing botanical drug products — plant-, algae- and fungi-derived medicines — including quality standards and study design for complex plant mixtures. Acting Commissioner Kyle Diamantas said the goal is to ensure \"promising, natural health options are evaluated through rigorous science.\" Comments are due November 3 (Docket FDA-2026-N-9550).",
+  "why": "The docket is an open channel on how FDA handles plant-derived actives — useful context, and a comment opportunity, while federal hemp product rules are being rewritten ahead of the December 11 effective date.",
+  "topics": [
+   "Rulemaking & Guidance"
+  ],
+  "edition_page": "editions/2026-09-05.html"
+ },
+ {
+  "date": "2026-09-05",
+  "vol": 1,
+  "ed": 22,
+  "section": "states",
+  "jurisdictions": [
+   "Missouri"
+  ],
+  "source": "Marijuana Moment",
+  "item_date": "Sep 4",
+  "headline": "Missouri regulators recall marijuana products over chemically modified cannabinoids",
+  "url": "https://www.marijuanamoment.net/trump-signs-hemp-product-ban-delay-newsletter-september-4-2026",
+  "summary": "Missouri's Division of Cannabis Regulation announced a recall of marijuana products found to contain chemically modified or synthetically derived cannabinoids, continuing the state's enforcement focus on conversion-derived THC in the regulated supply chain.",
+  "why": "The outcome determines whether any future Idaho cannabis or hemp-THC market access can come from voters or only from the Legislature — a long-horizon signal for regional distribution planning.",
+  "topics": [
+   "Hemp & THC",
+   "Enforcement & Recalls",
+   "Rulemaking & Guidance"
+  ],
+  "edition_page": "editions/2026-09-05.html"
+ },
+ {
+  "date": "2026-09-05",
+  "vol": 1,
+  "ed": 22,
+  "section": "states",
+  "jurisdictions": [
+   "Idaho"
+  ],
+  "source": "Marijuana Moment",
+  "item_date": "Sep 3",
+  "headline": "Idaho voters to decide measure giving Legislature sole power to legalize marijuana",
+  "url": "https://www.marijuanamoment.net/idaho-lawmaker-urges-voters-to-approve-ballot-measure-restricting-their-own-ability-to-legalize-marijuana",
+  "summary": "A constitutional amendment on Idaho's November ballot would give the Legislature exclusive authority to legalize marijuana, narcotics or other psychoactive substances, ending the citizen-initiative route. Sen. C. Scott Grow (R) urged approval, citing addiction concerns, while the Natural Medical Alliance of Idaho is separately challenging the state's rejection of its competing medical cannabis initiative.",
+  "why": "The outcome determines whether any future Idaho cannabis or hemp-THC market access can come from voters or only from the Legislature — a long-horizon signal for regional distribution planning.",
+  "topics": [
+   "Hemp & THC"
+  ],
+  "edition_page": "editions/2026-09-05.html"
  }
 ]
