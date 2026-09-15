@@ -453,6 +453,27 @@ def archive_rows(manifest):
     return "\n".join(rows)
 
 
+def latest_brief_body(latest):
+    """Inner brief HTML of the latest edition, for inline embedding on the
+    homepage (2026-09-15) — the edition page's transcript and prev/next nav
+    are stripped; those live on the edition page itself."""
+    try:
+        with open(p("editions", f"{latest['date']}.html"), encoding="utf-8") as f:
+            page = f.read()
+    except OSError:
+        return ""
+    m = re.search(r'<div class="brief-wrap">\s*(.*?)\s*</div>\s*</body>', page, re.S)
+    if not m:
+        return ""
+    inner = m.group(1)
+    for pat in (r"<details class=\"transcript\">.*?</details>",
+                r'<nav class="edition-nav">.*?</nav>'):
+        mm = re.search(pat, inner, re.S)
+        if mm:
+            inner = inner.replace(mm.group(0), "").strip()
+    return inner
+
+
 def build_index(manifest):
     with open(p("templates", "index.template.html"), encoding="utf-8") as f:
         tpl = f.read()
@@ -468,6 +489,7 @@ def build_index(manifest):
         "LATEST_META": f"Vol. {latest['vol']} &bull; Edition {latest['ed']} &bull; {pretty_date(latest['date'])}",
         "LATEST_TOPIC": topic,
         "LATEST_URL": f"editions/{latest['date']}.html",
+        "LATEST_BRIEF": latest_brief_body(latest),
         "LATEST_LISTEN_BTN": listen_btn,
         "ARCHIVE_ROWS": archive_rows(manifest),
         "EDITION_COUNT": str(len(manifest)),
