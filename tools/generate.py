@@ -471,7 +471,26 @@ def latest_brief_body(latest):
         mm = re.search(pat, inner, re.S)
         if mm:
             inner = inner.replace(mm.group(0), "").strip()
-    return inner
+    return strip_email_chrome(inner)
+
+
+def strip_email_chrome(inner):
+    """For the homepage embed, drop the email's own chrome — hidden preheader,
+    black header bar, footer and signature rows — since the site hero and
+    footer already carry the masthead, subscribe/listen actions, disclaimer
+    and signature (2026-09-15). Falls back to the full email untouched if the
+    expected structure isn't found."""
+    out = re.sub(r'^\s*<div style="display:none[^"]*"[^>]*>.*?</div>\s*', "", inner, count=1, flags=re.S)
+    header = re.search(r'<tr>\s*<td[^>]*background-color:\s*#000000', out)
+    body = re.search(r'<tr>\s*<td[^>]*background-color:\s*#ffffff', out)
+    if not (header and body and header.start() < body.start()):
+        return inner
+    out = out[:header.start()] + out[body.start():]
+    footer = re.search(r'<tr>\s*<td[^>]*background-color:\s*#000000', out)
+    tail = re.search(r'(</table>\s*</td>\s*</tr>\s*</table>\s*)$', out)
+    if footer and tail and footer.start() < tail.start(1):
+        out = out[:footer.start()] + tail.group(1)
+    return out
 
 
 def build_index(manifest):
