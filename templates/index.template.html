@@ -93,6 +93,33 @@
   .more { border:1px solid var(--green); color:#1e7a3c; background:#fff; border-radius:4px; padding:9px 22px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
   .more:hover { background:rgba(0,176,80,0.10); }
 
+  /* Embedded latest edition (2026-09-15): the homepage carries today's full
+     brief inline; Browse and Archive collapse below it. The brief is the same
+     Outlook-safe email body the edition pages wrap, so it reuses their
+     presentation rules (zoom capped lower here to sit well beside the 860px
+     column). */
+  .brief-wrap > table { margin:0 auto; }
+  @media (min-width: 900px)  { .brief-wrap { zoom: 1.25; } }
+  @media (max-width: 700px) {
+    .brief-wrap > table > tbody > tr > td { padding:10px 0 !important; }
+    .brief-wrap table[width="620"], .brief-wrap table[style*="620px"] { width:100% !important; }
+    .brief-wrap td[style*="32px"] { padding-left:18px !important; padding-right:18px !important; }
+    .brief-wrap td[style*="vertical-align:middle"] { display:block; width:auto !important; text-align:left !important; }
+    .brief-wrap table[align="right"] { float:none !important; margin:14px 0 2px 0 !important; }
+    .brief-wrap img { max-width:100%; height:auto; }
+  }
+  .permalink { font-size:13px; margin:2px 0 0 0; }
+  .permalink a { color:var(--green); text-decoration:none; font-weight:600; }
+  .permalink a:hover { text-decoration:underline; }
+
+  /* Collapsed section folds (2026-09-15) */
+  details.fold > summary { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:3px; color:#000000; border-bottom:2px solid #000000; padding-bottom:8px; margin:0 0 18px 0; cursor:pointer; list-style:none; }
+  details.fold > summary::-webkit-details-marker { display:none; }
+  details.fold > summary::before { content:"\25B8"; color:var(--green); margin-right:10px; }
+  details.fold[open] > summary::before { content:"\25BE"; }
+  details.fold > summary .hint { color:var(--muted); font-weight:600; letter-spacing:1px; text-transform:none; }
+  details.fold > summary:hover { color:#1e7a3c; }
+
   footer { background:#000000; margin-top:44px; padding:30px 0 36px 0; }
   footer .who { font-family:Oswald,'Arial Narrow',Arial,sans-serif; color:#ffffff; font-size:14px; margin:0 0 12px 0; }
   footer .who span { color:var(--green); }
@@ -115,19 +142,21 @@
   <p class="podrow">Podcast: <a href="https://podcasts.apple.com/us/podcast/nrbc-compliance-brief/id6801614362">Apple&nbsp;Podcasts</a> &bull; <a href="https://open.spotify.com/show/03478ALm8X6M6XWD8IYHVI">Spotify</a> &bull; <a href="https://music.amazon.com/podcasts/b34fcba9-0c1d-4d6a-a73c-b298c47eb7fc/nrbc-compliance-brief">Amazon&nbsp;Music</a> &bull; <a href="https://nrbc.transistor.fm">All&nbsp;apps</a></p>
 </div></header>
 
-<section><div class="wrap">
+<section id="latest">
+<div class="wrap">
   <h2 class="label">Latest Edition</h2>
-  <div class="latest">
-    <p class="meta">{{LATEST_META}}</p>
-    <h3><a href="{{LATEST_URL}}">{{LATEST_TOPIC}}</a></h3>
-    <div class="actions">
-      <a class="btn btn-dark" href="{{LATEST_URL}}">Read today&#8217;s brief</a>
-    </div>
-  </div>
-</div></section>
+</div>
+<div class="brief-wrap">
+{{LATEST_BRIEF}}
+</div>
+<div class="wrap">
+  <p class="permalink"><a href="{{LATEST_URL}}">Open this edition&#8217;s page &mdash; permalink &amp; audio transcript &rarr;</a></p>
+</div>
+</section>
 
 <section><div class="wrap">
-  <h2 class="label">Browse All Coverage</h2>
+  <details class="fold">
+  <summary class="label">Browse All Coverage <span class="hint">&mdash; filter by topic, state &amp; keyword</span></summary>
   <div class="controls">
     <input type="search" id="q" placeholder="Search headlines and summaries&hellip;" aria-label="Search items">
     <select id="jur" aria-label="Filter by jurisdiction"><option value="">All jurisdictions</option></select>
@@ -136,13 +165,16 @@
   <p class="count" id="count"></p>
   <ul class="items" id="items"></ul>
   <div class="more-wrap"><button class="more" id="more" hidden>Show all matching items</button></div>
+  </details>
 </div></section>
 
 <section><div class="wrap">
-  <h2 class="label">Archive &mdash; {{EDITION_COUNT}} Editions</h2>
+  <details class="fold">
+  <summary class="label">Archive &mdash; {{EDITION_COUNT}} Editions</summary>
   <ul class="archive">
 {{ARCHIVE_ROWS}}
   </ul>
+  </details>
 </div></section>
 
 <section><div class="wrap">
