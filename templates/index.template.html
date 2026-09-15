@@ -108,6 +108,8 @@
     .brief-wrap table[align="right"] { float:none !important; margin:14px 0 2px 0 !important; }
     .brief-wrap img { max-width:100%; height:auto; }
   }
+  .latest-meta { font-size:12.5px; color:var(--muted); margin:-8px 0 4px 0; }
+  #latest .brief-wrap table[style*="620px"], #latest .brief-wrap table[width="620"] { border-top:4px solid var(--green); }
   .permalink { font-size:13px; margin:2px 0 0 0; }
   .permalink a { color:var(--green); text-decoration:none; font-weight:600; }
   .permalink a:hover { text-decoration:underline; }
@@ -145,6 +147,7 @@
 <section id="latest">
 <div class="wrap">
   <h2 class="label">Latest Edition</h2>
+  <p class="latest-meta">{{LATEST_META}}</p>
 </div>
 <div class="brief-wrap">
 {{LATEST_BRIEF}}
