@@ -381,7 +381,43 @@ def write_sitemap(manifest):
     return len(manifest) + (1 if latest else 0)
 
 
-def wrap_edition(entry, raw_html, og_url=None, transcript_text=None, day_items=None):
+def edition_nav(entry, manifest):
+    """Previous/next edition links (2026-09-15): strengthens internal crawl
+    paths through the archive beyond the homepage list."""
+    ms = sorted(manifest, key=lambda e: e["date"])
+    idx = next((i for i, e in enumerate(ms) if e["date"] == entry["date"]), None)
+    if idx is None:
+        return ""
+    def link(e, cls, pre="", post=""):
+        rel = "prev" if cls == "prev" else "next"
+        return (f'<a class="{cls}" rel="{rel}" href="{e["date"]}.html">'
+                f'{pre}Ed. {e["ed"]} &mdash; {short_date(e["date"])}{post}</a>')
+    prev_html = link(ms[idx - 1], "prev", pre="&larr;&nbsp; ") if idx > 0 else '<span class="prev off"></span>'
+    next_html = link(ms[idx + 1], "next", post=" &nbsp;&rarr;") if idx < len(ms) - 1 else '<span class="next off"></span>'
+    return ('<nav class="edition-nav">' + prev_html
+            + '<a class="all" href="../">All editions</a>' + next_html + '</nav>')
+
+
+def refresh_nav_file(entry, manifest):
+    """Rewrite the prev/next nav inside an already-generated edition page —
+    used when a newly added edition gives its predecessor a 'next' link."""
+    fp = p("editions", f"{entry['date']}.html")
+    try:
+        with open(fp, encoding="utf-8") as f:
+            page = f.read()
+    except OSError:
+        return
+    nav = edition_nav(entry, manifest)
+    new, n = re.subn(r'<nav class="edition-nav">.*?</nav>', lambda m: nav, page, count=1, flags=re.S)
+    if n == 0:
+        new, n = re.subn(r'</div>\s*</body>', lambda m: nav + "\n</div>\n</body>", page, count=1)
+    if n and new != page:
+        with open(fp, "w", encoding="utf-8") as f:
+            f.write(new)
+        print(f"nav refreshed: editions/{entry['date']}.html")
+
+
+def wrap_edition(entry, raw_html, og_url=None, transcript_text=None, day_items=None, nav_html=""):
     with open(p("templates", "edition.template.html"), encoding="utf-8") as f:
         tpl = f.read()
     body = extract_body(raw_html)
@@ -395,6 +431,7 @@ def wrap_edition(entry, raw_html, og_url=None, transcript_text=None, day_items=N
         "JSONLD": edition_jsonld(entry, og_url, description),
         "EDITION_BODY": body,
         "TRANSCRIPT_SECTION": transcript_section(transcript_text),
+        "EDITION_NAV": nav_html,
     })
     os.makedirs(p("editions"), exist_ok=True)
     with open(p("editions", f"{entry['date']}.html"), "w", encoding="utf-8") as f:
@@ -476,10 +513,17 @@ def main():
                     transcript = f.read()
             except OSError as e:
                 print(f"transcript skipped ({e.__class__.__name__}: {e})")
-        page = wrap_edition(entry, raw, og_url, transcript, day_items)
+        page = wrap_edition(entry, raw, og_url, transcript, day_items,
+                            nav_html=edition_nav(entry, manifest))
         n = len([i for i in update_items_for(entry, page) if i["date"] == entry["date"]])
         save_json("manifest.json", manifest)
         print(f"parsed {n} items from {entry['date']}; og card: {og_url.rsplit('/', 1)[-1]}")
+        # Give the predecessor its 'next' link to this new edition; the printed
+        # "nav refreshed" path must be included in the publish POST.
+        ms = sorted(manifest, key=lambda e: e["date"])
+        idx = next((i for i, e in enumerate(ms) if e["date"] == entry["date"]), 0)
+        if idx > 0:
+            refresh_nav_file(ms[idx - 1], manifest)
     elif args.cmd == "rebuild":
         # Re-wrap every existing edition page with the current template
         # (SEO pass 2026-09-02) — the wrapped page is the source since raw
@@ -499,11 +543,15 @@ def main():
                 paras = re.findall(r"<p>(.*?)</p>", tm.group(0), re.S)
                 transcript = "\n\n".join(html_mod.unescape(x) for x in paras)
                 inner = inner.replace(tm.group(0), "").strip()
+            nm = re.search(r'<nav class="edition-nav">.*?</nav>', inner, re.S)
+            if nm:
+                inner = inner.replace(nm.group(0), "").strip()
             og_file = p("assets", "og", f"{e['date']}.png")
             og_url = (f"{SITE}/assets/og/{e['date']}.png" if os.path.exists(og_file)
                       else f"{SITE}/assets/og-banner.png")
             day_items = [i for i in items if i["date"] == e["date"]]
-            wrap_edition(e, inner, og_url, transcript, day_items)
+            wrap_edition(e, inner, og_url, transcript, day_items,
+                         nav_html=edition_nav(e, manifest))
             print(f"{e['date']} (Ed. {e['ed']}): rebuilt ({len(day_items)} items in description)")
     elif args.cmd == "reindex":
         all_items = []
