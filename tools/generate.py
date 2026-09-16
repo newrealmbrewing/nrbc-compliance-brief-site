@@ -366,6 +366,45 @@ def edition_jsonld(entry, og_url, description):
     return f'<script type="application/ld+json">{payload}</script>'
 
 
+def write_feed(manifest, max_entries=20):
+    """feed.xml: RSS 2.0 feed of the newest editions (RSS pass 2026-09-16).
+    Descriptions come from items.json via edition_description; pubDate is the
+    7:00 AM America/New_York send time in RFC 822 form."""
+    from email.utils import format_datetime
+    items_all = load_json("items.json", [])
+    newest = sorted(manifest, key=lambda e: e["date"], reverse=True)[:max_entries]
+    def rfc822(date_iso):
+        iso = edition_published_iso(date_iso)
+        return format_datetime(datetime.fromisoformat(iso))
+    out = ['<?xml version="1.0" encoding="UTF-8"?>',
+           '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">',
+           '<channel>',
+           '<title>NRBC Compliance Brief</title>',
+           f'<link>{SITE}/</link>',
+           '<description>A daily morning brief from New Realm Brewing on alcohol and hemp/THC '
+           'regulation — TTB and state actions, hemp THC beverage rules, tariffs, court decisions '
+           'and enforcement. Federal and all 50 states.</description>',
+           '<language>en-us</language>',
+           f'<atom:link href="{SITE}/feed.xml" rel="self" type="application/rss+xml"/>']
+    if newest:
+        out.append(f'<lastBuildDate>{rfc822(newest[0]["date"])}</lastBuildDate>')
+    for e in newest:
+        url = f'{SITE}/editions/{e["date"]}.html'
+        day_items = [i for i in items_all if i["date"] == e["date"]]
+        desc = edition_description(e, day_items)
+        out += ['<item>',
+                f'<title>{html_mod.escape(edition_title(e))}</title>',
+                f'<link>{url}</link>',
+                f'<guid isPermaLink="true">{url}</guid>',
+                f'<pubDate>{rfc822(e["date"])}</pubDate>',
+                f'<description>{html_mod.escape(desc)}</description>',
+                '</item>']
+    out += ['</channel>', '</rss>']
+    with open(p("feed.xml"), "w", encoding="utf-8") as f:
+        f.write("\n".join(out) + "\n")
+    return len(newest)
+
+
 def write_sitemap(manifest):
     """sitemap.xml: landing page plus every edition page (SEO pass 2026-09-02)."""
     latest = max((e["date"] for e in manifest), default=None)
@@ -606,6 +645,8 @@ def main():
         save_json("items.json", all_items)
     build_index(manifest)
     n_urls = write_sitemap(manifest)
+    n_feed = write_feed(manifest)
+    print(f"feed: feed.xml ({n_feed} entries)")
     print(f"ok: {len(manifest)} editions; index.html regenerated; sitemap: {n_urls} urls")
 
 
