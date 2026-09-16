@@ -501,7 +501,7 @@ def latest_brief_body(latest):
             page = f.read()
     except OSError:
         return ""
-    m = re.search(r'<div class="brief-wrap">\s*(.*?)\s*</div>\s*</body>', page, re.S)
+    m = re.search(r'<div class="brief-wrap"[^>]*>\s*(.*?)\s*</div>\s*(?:</main>\s*)?</body>', page, re.S)
     if not m:
         return ""
     inner = m.group(1)
@@ -612,7 +612,7 @@ def main():
         for e in manifest:
             with open(p("editions", f"{e['date']}.html"), encoding="utf-8") as f:
                 old = f.read()
-            m = re.search(r'<div class="brief-wrap">\s*(.*?)\s*</div>\s*</body>', old, re.S)
+            m = re.search(r'<div class="brief-wrap"[^>]*>\s*(.*?)\s*</div>\s*(?:</main>\s*)?</body>', old, re.S)
             if not m:
                 print(f"{e['date']}: brief-wrap not found, skipped")
                 continue
