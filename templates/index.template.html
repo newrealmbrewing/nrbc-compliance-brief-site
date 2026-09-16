@@ -50,6 +50,9 @@
 
   :root { --green:#00B050; --green-l:#007636; --ink:#2b2b2b; --muted:#8a8a8a; --muted-l:#646464; --bg:#ebebeb; }
   * { box-sizing:border-box; }
+  /* Below-the-fold render deferral (perf pass v3): the embedded brief and the
+     collapsed Browse/Archive/About sections don't hold up first paint. */
+  #latest .brief-wrap, main > section:not(#latest) { content-visibility:auto; contain-intrinsic-size:auto 1200px; }
   body { margin:0; background:var(--bg); color:var(--ink); font-family:'Open Sans','os-fb-arial','os-fb-roboto','os-fb-noto','os-fb-dejavu',Arial,Helvetica,sans-serif; }
   a { color:var(--green-l); }
   .wrap { max-width:860px; margin:0 auto; padding:0 20px; }
@@ -220,10 +223,13 @@
   <p class="updated">Updated {{UPDATED}}</p>
 </div></footer>
 
-<script id="items-data" type="application/json">{{ITEMS_JSON}}</script>
 <script>
 (function () {
-  var ITEMS = JSON.parse(document.getElementById('items-data').textContent || '[]');
+// Browse data loads lazily (perf pass v3, 2026-09-16): items.json leaves the
+// critical HTML and is fetched at idle or when the Browse fold first opens.
+var booted = false;
+function boot(ITEMS) {
+  if (booted) return; booted = true;
   ITEMS.sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
 
   var state = { topic: '', jur: '', q: '', limit: 25 };
@@ -296,6 +302,16 @@
     $more.hidden = shown.length >= hits.length;
   }
   renderList();
+}
+function load() {
+  try {
+    fetch('items.json').then(function (r) { return r.json(); }).then(boot).catch(function () {});
+  } catch (e) {}
+}
+var fold = document.querySelector('details.fold');
+if (fold) fold.addEventListener('toggle', function () { if (fold.open) load(); });
+if ('requestIdleCallback' in window) requestIdleCallback(load, { timeout: 4000 });
+else setTimeout(load, 2500);
 })();
 </script>
 
