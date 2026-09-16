@@ -21,16 +21,34 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23000000'/%3E%3Ctext x='50' y='68' font-size='52' font-family='Arial' font-weight='bold' fill='%2300B050' text-anchor='middle'%3ENR%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap"></noscript>
 <style>
-  :root { --green:#00B050; --ink:#2b2b2b; --muted:#8a8a8a; --bg:#ebebeb; }
+  /* Fallback font metrics (perf pass 2026-09-16): Arial sized to match the web
+     fonts so the swap causes no layout shift; harmless where local Arial is absent. */
+  @font-face { font-family:Arial; src:local('Arial'); size-adjust:104.3%; ascent-override:102.4%; descent-override:28.1%; line-gap-override:0%; }
+  @font-face { font-family:'Arial Narrow'; src:local('Arial Narrow'); size-adjust:85.8%; ascent-override:139.9%; descent-override:33.9%; line-gap-override:0%; }
+  @font-face { font-family:'os-fallback'; src:local('Arial'),local('Liberation Sans'),local('Helvetica Neue'),local('DejaVu Sans'); size-adjust:104.3%; ascent-override:102.4%; descent-override:28.1%; line-gap-override:0%; }
+  @font-face { font-family:'osw-fallback'; src:local('Arial Narrow'),local('Liberation Sans Narrow'),local('Arial'),local('Liberation Sans'); size-adjust:85.8%; ascent-override:119%; descent-override:29%; line-gap-override:0%; }
+  .brief-wrap [style*="Open Sans"] { font-family:'Open Sans','os-fallback',Arial,Helvetica,sans-serif !important; }
+  .brief-wrap [style*="Oswald"] { font-family:Oswald,'osw-fallback','Arial Narrow',Arial,sans-serif !important; }
+  /* Site-only contrast pass (2026-09-16): darken low-contrast email colors when
+     the brief renders on the web; the email itself is unchanged. Text on the
+     black header/footer cells is restored — those pass on dark backgrounds. */
+  .brief-wrap [style*="color:#8a8a8a"] { color:#646464 !important; }
+  .brief-wrap [style*="color:#00B050"] { color:#007636 !important; }
+  .brief-wrap [style*="#000000"] [style*="color:#8a8a8a"] { color:#8a8a8a !important; }
+  .brief-wrap [style*="#000000"] [style*="color:#00B050"] { color:#00B050 !important; }
+  .brief-wrap p > a[style*="color:#00B050"] { text-decoration:underline !important; }
+
+  :root { --green:#00B050; --green-l:#007636; --ink:#2b2b2b; --muted:#8a8a8a; --muted-l:#646464; --bg:#ebebeb; }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font-family:'Open Sans',Arial,Helvetica,sans-serif; }
-  a { color:var(--green); }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:'Open Sans','os-fallback',Arial,Helvetica,sans-serif; }
+  a { color:var(--green-l); }
   .wrap { max-width:860px; margin:0 auto; padding:0 20px; }
 
   header.hero { background:#000000; color:#ffffff; padding:56px 0 44px 0; }
-  .hero h1 { margin:0; font-family:Oswald,'Arial Narrow',Arial,sans-serif; font-weight:700; font-size:40px; letter-spacing:1px; line-height:1.1; }
+  .hero h1 { margin:0; font-family:Oswald,'osw-fallback','Arial Narrow',Arial,sans-serif; font-weight:700; font-size:40px; letter-spacing:1px; line-height:1.1; }
   .hero .sub { margin:10px 0 0 0; font-size:14px; text-transform:uppercase; letter-spacing:4px; color:var(--green); font-weight:600; }
   .hero p.tag { margin:22px 0 0 0; max-width:560px; font-size:16px; line-height:1.6; color:#d9d9d9; }
   .cta { margin-top:28px; display:flex; flex-wrap:wrap; gap:12px; }
@@ -47,10 +65,10 @@
   h2.label { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:3px; color:#000000; border-bottom:2px solid #000000; padding-bottom:8px; margin:0 0 18px 0; }
 
   .latest { background:#ffffff; border-left:4px solid var(--green); padding:22px 26px; }
-  .latest .meta { font-size:12px; color:var(--muted); margin:0 0 6px 0; }
-  .latest h3 { margin:0 0 14px 0; font-family:Oswald,'Arial Narrow',Arial,sans-serif; font-size:24px; line-height:1.25; }
+  .latest .meta { font-size:12px; color:var(--muted-l); margin:0 0 6px 0; }
+  .latest h3 { margin:0 0 14px 0; font-family:Oswald,'osw-fallback','Arial Narrow',Arial,sans-serif; font-size:24px; line-height:1.25; }
   .latest h3 a { color:#000000; text-decoration:none; }
-  .latest h3 a:hover { color:var(--green); }
+  .latest h3 a:hover { color:var(--green-l); }
   .latest .actions { display:flex; flex-wrap:wrap; gap:10px; }
   .latest .actions .btn { padding:9px 16px; font-size:13px; }
   .btn-dark { background:#000000; color:#ffffff; }
@@ -60,10 +78,10 @@
   ul.archive { list-style:none; margin:0; padding:0; background:#ffffff; }
   ul.archive li { display:flex; align-items:baseline; gap:14px; padding:13px 18px; border-bottom:1px solid #ececec; font-size:14px; }
   ul.archive li:last-child { border-bottom:none; }
-  .row-date { flex:0 0 56px; color:var(--muted); font-size:12px; }
-  .row-ed { flex:0 0 92px; color:var(--muted); font-size:12px; }
+  .row-date { flex:0 0 56px; color:var(--muted-l); font-size:12px; }
+  .row-ed { flex:0 0 92px; color:var(--muted-l); font-size:12px; }
   .row-topic { flex:1; color:#000000; text-decoration:none; font-weight:600; }
-  .row-topic:hover { color:var(--green); }
+  .row-topic:hover { color:var(--green-l); }
   .row-listen { flex:0 0 auto; text-decoration:none; font-size:12px; }
   @media (max-width:560px){ .row-ed{display:none;} .hero h1{font-size:32px;} }
 
@@ -77,13 +95,13 @@
   .chip { border:1px solid var(--green); color:#1e7a3c; background:#ffffff; border-radius:999px; padding:6px 14px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit; }
   .chip:hover { background:rgba(0,176,80,0.10); }
   .chip.active { background:var(--green); color:#000000; border-color:var(--green); }
-  .count { font-size:12.5px; color:var(--muted); margin:0 0 10px 0; }
+  .count { font-size:12.5px; color:var(--muted-l); margin:0 0 10px 0; }
   .count b { color:#000; }
   ul.items { list-style:none; margin:0; padding:0; }
   ul.items li { background:#ffffff; border-left:3px solid var(--green); padding:14px 18px; margin-bottom:10px; }
   .it-meta { font-size:11.5px; color:var(--muted); margin:0 0 4px 0; text-transform:uppercase; letter-spacing:1px; }
   .it-meta .jur { color:#1e7a3c; font-weight:700; }
-  .it-head { margin:0 0 6px 0; font-family:Oswald,'Arial Narrow',Arial,sans-serif; font-size:17px; line-height:1.3; }
+  .it-head { margin:0 0 6px 0; font-family:Oswald,'osw-fallback','Arial Narrow',Arial,sans-serif; font-size:17px; line-height:1.3; }
   .it-head a { color:#000000; text-decoration:none; }
   .it-head a:hover { color:var(--green); }
   .it-sum { margin:0 0 8px 0; font-size:13.5px; color:var(--ink); }
@@ -109,10 +127,10 @@
     .brief-wrap table[align="right"] { float:none !important; margin:14px 0 2px 0 !important; }
     .brief-wrap img { max-width:100%; height:auto; }
   }
-  .latest-meta { font-size:12.5px; color:var(--muted); margin:-8px 0 4px 0; }
+  .latest-meta { font-size:12.5px; color:var(--muted-l); margin:-8px 0 4px 0; }
   #latest .brief-wrap table[style*="620px"], #latest .brief-wrap table[width="620"] { border-top:4px solid var(--green); }
   .permalink { font-size:13px; margin:2px 0 0 0; }
-  .permalink a { color:var(--green); text-decoration:none; font-weight:600; }
+  .permalink a { color:var(--green-l); text-decoration:none; font-weight:600; }
   .permalink a:hover { text-decoration:underline; }
 
   /* Collapsed section folds (2026-09-15) */
@@ -120,16 +138,16 @@
   details.fold > summary::-webkit-details-marker { display:none; }
   details.fold > summary::before { content:"\25B8"; color:var(--green); margin-right:10px; }
   details.fold[open] > summary::before { content:"\25BE"; }
-  details.fold > summary .hint { color:var(--muted); font-weight:600; letter-spacing:1px; text-transform:none; }
+  details.fold > summary .hint { color:var(--muted-l); font-weight:600; letter-spacing:1px; text-transform:none; }
   details.fold > summary:hover { color:#1e7a3c; }
 
   footer { background:#000000; margin-top:44px; padding:30px 0 36px 0; }
-  footer .who { font-family:Oswald,'Arial Narrow',Arial,sans-serif; color:#ffffff; font-size:14px; margin:0 0 12px 0; }
+  footer .who { font-family:Oswald,'osw-fallback','Arial Narrow',Arial,sans-serif; color:#ffffff; font-size:14px; margin:0 0 12px 0; }
   footer .who span { color:var(--green); }
   footer .fine { color:#8a8a8a; font-size:11px; line-height:1.6; max-width:680px; margin:0 0 14px 0; }
   footer .links { font-size:12px; color:#8a8a8a; }
   footer .links a { color:var(--green); text-decoration:none; font-weight:600; }
-  .updated { font-size:10px; color:#5f5f5f; margin-top:16px; }
+  .updated { font-size:10px; color:#8a8a8a; margin-top:16px; }
 </style>
 </head>
 <body>
@@ -144,6 +162,7 @@
   </div>
   <p class="podrow">Podcast: <a href="https://podcasts.apple.com/us/podcast/nrbc-compliance-brief/id6801614362">Apple&nbsp;Podcasts</a> &bull; <a href="https://open.spotify.com/show/03478ALm8X6M6XWD8IYHVI">Spotify</a> &bull; <a href="https://music.amazon.com/podcasts/b34fcba9-0c1d-4d6a-a73c-b298c47eb7fc/nrbc-compliance-brief">Amazon&nbsp;Music</a> &bull; <a href="https://nrbc.transistor.fm">All&nbsp;apps</a></p>
 </div></header>
+<main>
 
 <section id="latest">
 <div class="wrap">
@@ -186,6 +205,7 @@
   <p class="about">The NRBC Compliance Brief is a daily morning email from New Realm Brewing covering regulatory and compliance developments in alcohol and hemp/THC beverages, written for New Realm&#8217;s leadership team and its distributor and retail partners &mdash; and open to anyone in the industry. It reports what happened &mdash; agency actions, votes, effective dates, court rulings, enforcement &mdash; with every position attributed to its named actor and every headline linked to the original source. To join the list, use the Subscribe button above or email <a href="mailto:jbarnes@newrealmbrewing.com?subject=Subscribe%20-%20Compliance%20Brief">jbarnes@newrealmbrewing.com</a> with the subject &#8220;Subscribe - Compliance Brief.&#8221; Unsubscribe anytime from any edition.</p>
 </div></section>
 
+</main>
 <footer><div class="wrap">
   <p class="who">Jeremy Barnes <span>|</span> Chief Financial Officer, New Realm Brewing Co.</p>
   <p class="fine">This brief is for general informational purposes only and is not legal advice; it is compiled with AI assistance from the linked sources &mdash; please confirm details at the link before acting on them.</p>
