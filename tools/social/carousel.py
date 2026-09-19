@@ -2,11 +2,11 @@
 """Build the daily LinkedIn carousel PDF from items.json (brand style).
 
 Usage: python3 tools/social/carousel.py --date YYYY-MM-DD --out /path/brief-carousel.pdf
-Poster-style deck adopted 2026-09-19 at Jeremy's direction: 4:5 portrait pages
-(1080x1350pt), capped at 6 pages (cover, top story, up to 3 further items, CTA),
-one story per page in poster typography — huge headline, jurisdiction, source
-line, and a trimmed takeaway. No email-style body text: pages must be readable
-at feed size without tapping. (Earlier square/16:9 experiments superseded.)
+Poster-style deck, 4:5 portrait pages (1080x1350pt), capped at 6 pages (cover,
+top story, up to 3 further items, CTA). Per Jeremy's direction 2026-09-19 each
+item page carries: the title (large), the item's summary paragraph at a size
+readable in the feed, and a closing "Why it matters" line when the edition has
+one. No sentence-splitting of source text (abbreviations like "Gov." broke it).
 Fonts: converts the repo's woff2 to TTF at runtime.
 """
 import argparse, json, os, re, sys, tempfile
@@ -62,18 +62,6 @@ def draw_lines(c, lines, x, y, font, size, leading, color):
         c.drawString(x, y - i * leading, ln)
     return y - len(lines) * leading
 
-def first_sentence(text):
-    m = re.match(r"(.+?[.!?])(\s|$)", text)
-    return m.group(1) if m else text
-
-def takeaway(it):
-    """The one line a scroller should keep: why-it-matters, else first sentence."""
-    if it.get("why"):
-        return first_sentence(it["why"])
-    if it.get("summary"):
-        return first_sentence(it["summary"])
-    return ""
-
 def footer_bar(c, entry, light_page=True):
     c.setFillColor(BLACK); c.rect(0, 0, W, 96, stroke=0, fill=1)
     c.setFillColor(WHITE); c.setFont("Oswald-Bold", 26); c.drawString(MARGIN, 36, "NEW REALM BREWING")
@@ -102,21 +90,24 @@ def item_page(c, entry, it, idx, total):
     c.setFillColor(GREEN); c.setFont("OpenSans-Bold", 28); c.drawString(MARGIN, H - 130, label)
     c.setFillColor(MUTED); c.setFont("OpenSans", 24); c.drawRightString(W - MARGIN, H - 130, f"{idx}/{total}")
     juris = " / ".join(it.get("jurisdictions", []))
-    if juris:
-        c.setFillColor(INK); c.setFont("OpenSans-Bold", 26); c.drawString(MARGIN, H - 182, juris.upper())
-    # Poster headline — the page's one job.
-    hl = clip_lines(wrap(c, it["headline"], "Oswald-Bold", 68, W - 2 * MARGIN), 5)
-    y = draw_lines(c, hl, MARGIN, H - 292, "Oswald-Bold", 68, 82, BLACK) - 20
-    # Trimmed takeaway, large enough to read in feed.
-    t = takeaway(it)
-    if t:
-        lines = clip_lines(wrap(c, t, "OpenSans", 32, W - 2 * MARGIN - 40), 5)
+    if juris and juris.upper() != label:
+        c.setFillColor(INK); c.setFont("OpenSans-Bold", 26); c.drawString(MARGIN, H - 180, juris.upper())
+    # Title
+    hl = clip_lines(wrap(c, it["headline"], "Oswald-Bold", 56, W - 2 * MARGIN), 4)
+    y = draw_lines(c, hl, MARGIN, H - 272, "Oswald-Bold", 56, 70, BLACK) - 24
+    # Details paragraph — the item's full summary, sized to read in the feed.
+    if it.get("summary"):
+        lines = clip_lines(wrap(c, it["summary"], "OpenSans", 30, W - 2 * MARGIN), 10)
+        y = draw_lines(c, lines, MARGIN, y - 16, "OpenSans", 30, 44, INK) - 26
+    # Closing takeaway, when the edition carries one.
+    if it.get("why"):
+        lines = clip_lines(wrap(c, "Why it matters: " + it["why"], "OpenSans-Italic", 28, W - 2 * MARGIN - 36), 5)
         c.setStrokeColor(GREEN); c.setLineWidth(8)
-        c.line(MARGIN, y - 6, MARGIN, y - 6 - (len(lines) - 1) * 48 - 34)
-        draw_lines(c, lines, MARGIN + 40, y - 40, "OpenSans", 32, 48, DGREEN)
-    src = " • ".join(v for v in [it.get("source", ""), it.get("item_date", "")] if v)
-    if src:
-        c.setFillColor(MUTED); c.setFont("OpenSans", 22); c.drawString(MARGIN, 140, f"Source: {src} — link in the email & site edition")
+        c.line(MARGIN, y - 8, MARGIN, y - 8 - (len(lines) - 1) * 42 - 30)
+        draw_lines(c, lines, MARGIN + 36, y - 38, "OpenSans-Italic", 28, 42, DGREEN)
+    src_line = " • ".join(v for v in [it.get("source", ""), it.get("item_date", "")] if v)
+    if src_line:
+        c.setFillColor(MUTED); c.setFont("OpenSans", 22); c.drawString(MARGIN, 140, f"Source: {src_line} — link in the email & site edition")
     footer_bar(c, entry)
     c.showPage()
 
