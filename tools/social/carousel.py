@@ -2,11 +2,13 @@
 """Build the daily LinkedIn carousel PDF from items.json (brand style).
 
 Usage: python3 tools/social/carousel.py --date YYYY-MM-DD --out /path/brief-carousel.pdf
-Poster-style deck, 4:5 portrait pages (1080x1350pt), capped at 6 pages (cover,
-top story, up to 3 further items, CTA). Per Jeremy's direction 2026-09-19 each
-item page carries: the title (large), the item's summary paragraph at a size
-readable in the feed, and a closing "Why it matters" line when the edition has
-one. No sentence-splitting of source text (abbreviations like "Gov." broke it).
+Poster-style deck, 4:5 portrait pages (1080x1350pt), capped at 7 pages: cover,
+top story, up to 3 further items, ON THE RADAR (second to last, parsed from the
+edition page since radar entries are not headline-shaped items), then the CTA.
+Per Jeremy's direction 2026-09-19 each item page carries: the title (large),
+the item's summary paragraph at a size readable in the feed, and a closing
+"Why it matters" line when the edition has one. No sentence-splitting of
+source text (abbreviations like "Gov." broke it).
 Fonts: converts the repo's woff2 to TTF at runtime.
 """
 import argparse, json, os, re, sys, tempfile
@@ -111,6 +113,50 @@ def item_page(c, entry, it, idx, total):
     footer_bar(c, entry)
     c.showPage()
 
+def strip_tags(fragment):
+    import html as html_mod
+    txt = re.sub(r"<[^>]+>", " ", fragment)
+    txt = html_mod.unescape(txt)
+    txt = re.sub(r"\s+", " ", txt).strip()
+    return txt.replace("( ", "(").replace(" )", ")")
+
+def parse_radar(date):
+    """Pull ON THE RADAR entries (green bold lead + text) from the edition page."""
+    path = os.path.join(ROOT, "editions", f"{date}.html")
+    if not os.path.exists(path):
+        return []
+    h = open(path, encoding="utf-8").read()
+    m = re.search(r"(?i)>\s*on\s+the\s+radar\s*<", h)
+    if not m:
+        return []
+    chunk = h[m.start():]
+    # stop at the footer (black bar) so we don't scan the whole page
+    stop = re.search(r'background-color:#000000', chunk)
+    if stop:
+        chunk = chunk[:stop.start()]
+    entries = []
+    for em in re.finditer(r'<b style="color:#00B050">(.*?)</b>(.*?)</p>', chunk, re.S):
+        lead = strip_tags(em.group(1)).rstrip("—— ").strip()
+        body = strip_tags(em.group(2))
+        if lead and body:
+            entries.append((lead, body))
+    return entries[:3]
+
+def radar_page(c, entry, entries):
+    c.setFillColor(WHITE); c.rect(0, 0, W, H, stroke=0, fill=1)
+    c.setFillColor(GREEN); c.setFont("OpenSans-Bold", 28); c.drawString(MARGIN, H - 130, "ON THE RADAR")
+    c.setFillColor(INK); c.setFont("Oswald-Bold", 56); c.drawString(MARGIN, H - 220, "Dates worth planning around")
+    y = H - 330
+    for lead, body in entries:
+        c.setFillColor(GREEN); c.setFont("Oswald-Bold", 40); c.drawString(MARGIN, y, lead.upper())
+        y -= 54
+        lines = clip_lines(wrap(c, body, "OpenSans", 28, W - 2 * MARGIN), 5)
+        y = draw_lines(c, lines, MARGIN, y, "OpenSans", 28, 42, INK) - 44
+    c.setFillColor(MUTED); c.setFont("OpenSans", 22)
+    c.drawString(MARGIN, 140, "Source links in the email & site edition")
+    footer_bar(c, entry)
+    c.showPage()
+
 def cta(c, entry):
     c.setFillColor(BLACK); c.rect(0, 0, W, H, stroke=0, fill=1)
     lines = ["Every morning", "at 7:00 AM ET."]
@@ -149,9 +195,12 @@ def main():
     cover(c, e, [i for i in items if i["section"] == "top"])
     for n, it in enumerate(items, 1):
         item_page(c, e, it, n, len(items))
+    radar = parse_radar(a.date)
+    if radar:
+        radar_page(c, e, radar)
     cta(c, e)
     c.save()
-    print(f"carousel: {a.out} ({len(items)} item pages + cover + CTA, poster 4:5)")
+    print(f"carousel: {a.out} ({len(items)} item pages + cover + {len(radar) and 1} radar + CTA, poster 4:5)")
 
 if __name__ == "__main__":
     main()
