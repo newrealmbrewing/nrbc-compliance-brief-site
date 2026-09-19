@@ -2,11 +2,11 @@
 """Build the daily LinkedIn carousel PDF from items.json (brand style).
 
 Usage: python3 tools/social/carousel.py --date YYYY-MM-DD --out /path/brief-carousel.pdf
-Pages are landscape 16:9 (1920x1080pt), capped at 6 pages: cover, the top story,
-up to 3 further item cards (federal, then states), then a subscribe CTA page.
-(16:9 landscape adopted 2026-09-19 at Jeremy's direction: LinkedIn's document
-viewer fills the post width, so only a page as wide as the viewer shows one
-page at a time — square and 4:5 both left the next page peeking.)
+Poster-style deck adopted 2026-09-19 at Jeremy's direction: 4:5 portrait pages
+(1080x1350pt), capped at 6 pages (cover, top story, up to 3 further items, CTA),
+one story per page in poster typography — huge headline, jurisdiction, source
+line, and a trimmed takeaway. No email-style body text: pages must be readable
+at feed size without tapping. (Earlier square/16:9 experiments superseded.)
 Fonts: converts the repo's woff2 to TTF at runtime.
 """
 import argparse, json, os, re, sys, tempfile
@@ -20,10 +20,11 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
-W, H = 1920, 1080
+W, H = 1080, 1350
 MAX_ITEM_PAGES = 4  # top story + up to 3 more; cover + items + CTA <= 6 pages
 BLACK, WHITE, GREEN = HexColor("#000000"), HexColor("#ffffff"), HexColor("#00B050")
 INK, MUTED, DGREEN, BG = HexColor("#2b2b2b"), HexColor("#8a8a8a"), HexColor("#1e7a3c"), HexColor("#ebebeb")
+MARGIN = 84
 
 def register_fonts():
     td = tempfile.mkdtemp()
@@ -47,70 +48,94 @@ def wrap(c, text, font, size, maxw):
     if cur: lines.append(cur)
     return lines
 
-def draw_lines(c, lines, x, y, font, size, leading, color, maxlines=None):
-    c.setFont(font, size); c.setFillColor(color)
-    for i, ln in enumerate(lines if maxlines is None else lines[:maxlines]):
-        c.drawString(x, y - i * leading, ln)
-    n = len(lines if maxlines is None else lines[:maxlines])
-    return y - n * leading
+def clip_lines(lines, maxlines):
+    """Cap at maxlines, ellipsizing the last kept line if content was cut."""
+    if len(lines) <= maxlines:
+        return lines
+    kept = lines[:maxlines]
+    kept[-1] = kept[-1].rstrip(".,;:") + " …"
+    return kept
 
-def header(c, sub):
-    c.setFillColor(BLACK); c.rect(0, H - 150, W, 150, stroke=0, fill=1)
-    c.setFillColor(WHITE); c.setFont("Oswald-Bold", 44); c.drawString(80, H - 84, "NEW REALM BREWING")
-    c.setFillColor(GREEN); c.setFont("OpenSans-Bold", 18)
-    c.drawString(80, H - 120, "D A I L Y   C O M P L I A N C E   B R I E F")
-    c.setFillColor(MUTED); c.setFont("OpenSans", 17); c.drawRightString(W - 80, H - 120, sub)
+def draw_lines(c, lines, x, y, font, size, leading, color):
+    c.setFont(font, size); c.setFillColor(color)
+    for i, ln in enumerate(lines):
+        c.drawString(x, y - i * leading, ln)
+    return y - len(lines) * leading
+
+def first_sentence(text):
+    m = re.match(r"(.+?[.!?])(\s|$)", text)
+    return m.group(1) if m else text
+
+def takeaway(it):
+    """The one line a scroller should keep: why-it-matters, else first sentence."""
+    if it.get("why"):
+        return first_sentence(it["why"])
+    if it.get("summary"):
+        return first_sentence(it["summary"])
+    return ""
+
+def footer_bar(c, entry, light_page=True):
+    c.setFillColor(BLACK); c.rect(0, 0, W, 96, stroke=0, fill=1)
+    c.setFillColor(WHITE); c.setFont("Oswald-Bold", 26); c.drawString(MARGIN, 36, "NEW REALM BREWING")
+    c.setFillColor(GREEN); c.setFont("OpenSans-Bold", 15)
+    c.drawRightString(W - MARGIN, 40, f"DAILY COMPLIANCE BRIEF  •  VOL. {entry['vol']}, ED. {entry['ed']}")
 
 def cover(c, entry, tops):
     c.setFillColor(BLACK); c.rect(0, 0, W, H, stroke=0, fill=1)
-    c.setFillColor(WHITE); c.setFont("Oswald-Bold", 72); c.drawString(100, H - 190, "NEW REALM BREWING")
-    c.setFillColor(GREEN); c.setFont("OpenSans-Bold", 26)
-    c.drawString(100, H - 244, "D A I L Y   C O M P L I A N C E   B R I E F")
-    c.setFillColor(HexColor("#9e9e9e")); c.setFont("OpenSans", 22)
-    c.drawString(100, H - 298, f"Vol. {entry['vol']}  •  Edition {entry['ed']}  •  {entry['pretty']}")
-    c.setStrokeColor(GREEN); c.setLineWidth(6); c.line(100, H - 340, 360, H - 340)
+    c.setFillColor(WHITE); c.setFont("Oswald-Bold", 64); c.drawString(MARGIN, H - 170, "NEW REALM BREWING")
+    c.setFillColor(GREEN); c.setFont("OpenSans-Bold", 24)
+    c.drawString(MARGIN, H - 222, "D A I L Y   C O M P L I A N C E   B R I E F")
+    c.setFillColor(HexColor("#9e9e9e")); c.setFont("OpenSans", 24)
+    c.drawString(MARGIN, H - 274, f"Vol. {entry['vol']}  •  Edition {entry['ed']}  •  {entry['pretty']}")
+    c.setStrokeColor(GREEN); c.setLineWidth(6); c.line(MARGIN, H - 318, MARGIN + 250, H - 318)
     if tops:
-        c.setFillColor(GREEN); c.setFont("OpenSans-Bold", 22); c.drawString(100, 440, "TOP STORY")
-        y = 372
-        for ln in wrap(c, tops[0]["headline"], "Oswald-Bold", 54, W - 220)[:3]:
-            c.setFillColor(WHITE); c.setFont("Oswald-Bold", 54); c.drawString(100, y, ln); y -= 68
-    c.setFillColor(HexColor("#9e9e9e")); c.setFont("OpenSans", 22)
-    c.drawString(100, 84, "Swipe for today's items  →")
+        c.setFillColor(GREEN); c.setFont("OpenSans-Bold", 28); c.drawString(MARGIN, 796, "TOP STORY")
+        lines = clip_lines(wrap(c, tops[0]["headline"], "Oswald-Bold", 76, W - 2 * MARGIN), 5)
+        draw_lines(c, lines, MARGIN, 716, "Oswald-Bold", 76, 92, WHITE)
+    c.setFillColor(HexColor("#9e9e9e")); c.setFont("OpenSans", 26)
+    c.drawString(MARGIN, 136, "Swipe for today's items  →")
     c.showPage()
 
 def item_page(c, entry, it, idx, total):
-    c.setFillColor(BG); c.rect(0, 0, W, H, stroke=0, fill=1)
-    header(c, f"Vol. {entry['vol']} • Ed. {entry['ed']} • {entry['pretty']}")
-    c.setFillColor(WHITE); c.rect(72, 84, W - 144, H - 150 - 84 - 28, stroke=0, fill=1)
+    c.setFillColor(WHITE); c.rect(0, 0, W, H, stroke=0, fill=1)
     label = {"top": "TOP STORY", "federal": "FEDERAL", "states": "AROUND THE STATES"}.get(it["section"], "BRIEF")
-    x, top = 140, H - 232
-    c.setFillColor(GREEN); c.setFont("OpenSans-Bold", 22); c.drawString(x, top, label)
-    c.setFillColor(MUTED); c.setFont("OpenSans", 18); c.drawRightString(W - 140, top, f"{idx}/{total}")
-    y = top - 64
-    y = draw_lines(c, wrap(c, it["headline"], "Oswald-Bold", 42, W - 280), x, y, "Oswald-Bold", 42, 54, BLACK, 3) - 14
-    meta = " • ".join(v for v in [" / ".join(it.get("jurisdictions", [])), it.get("source", ""), it.get("item_date", "")] if v)
-    y = draw_lines(c, wrap(c, meta, "OpenSans-Bold", 18, W - 280), x, y, "OpenSans-Bold", 18, 28, MUTED, 2) - 18
-    if it.get("summary"):
-        y = draw_lines(c, wrap(c, it["summary"], "OpenSans", 26, 1440), x, y, "OpenSans", 26, 40, INK, 7) - 22
-    if it.get("why"):
-        c.setStrokeColor(GREEN); c.setLineWidth(6); ly = y + 24
-        lines = wrap(c, "Why it matters: " + it["why"], "OpenSans-Italic", 24, 1400)[:4]
-        c.line(x, ly, x, ly - len(lines) * 36 + 8)
-        draw_lines(c, lines, x + 28, y, "OpenSans-Italic", 24, 36, DGREEN, 4)
+    c.setFillColor(GREEN); c.setFont("OpenSans-Bold", 28); c.drawString(MARGIN, H - 130, label)
+    c.setFillColor(MUTED); c.setFont("OpenSans", 24); c.drawRightString(W - MARGIN, H - 130, f"{idx}/{total}")
+    juris = " / ".join(it.get("jurisdictions", []))
+    if juris:
+        c.setFillColor(INK); c.setFont("OpenSans-Bold", 26); c.drawString(MARGIN, H - 182, juris.upper())
+    # Poster headline — the page's one job.
+    hl = clip_lines(wrap(c, it["headline"], "Oswald-Bold", 68, W - 2 * MARGIN), 5)
+    y = draw_lines(c, hl, MARGIN, H - 292, "Oswald-Bold", 68, 82, BLACK) - 20
+    # Trimmed takeaway, large enough to read in feed.
+    t = takeaway(it)
+    if t:
+        lines = clip_lines(wrap(c, t, "OpenSans", 32, W - 2 * MARGIN - 40), 5)
+        c.setStrokeColor(GREEN); c.setLineWidth(8)
+        c.line(MARGIN, y - 6, MARGIN, y - 6 - (len(lines) - 1) * 48 - 34)
+        draw_lines(c, lines, MARGIN + 40, y - 40, "OpenSans", 32, 48, DGREEN)
+    src = " • ".join(v for v in [it.get("source", ""), it.get("item_date", "")] if v)
+    if src:
+        c.setFillColor(MUTED); c.setFont("OpenSans", 22); c.drawString(MARGIN, 140, f"Source: {src} — link in the email & site edition")
+    footer_bar(c, entry)
     c.showPage()
 
 def cta(c, entry):
     c.setFillColor(BLACK); c.rect(0, 0, W, H, stroke=0, fill=1)
-    c.setFillColor(WHITE); c.setFont("Oswald-Bold", 58); c.drawString(100, H - 220, "Every morning at 7:00 AM ET.")
-    c.setFillColor(HexColor("#cfcfcf")); c.setFont("OpenSans", 26); y = H - 300
-    for ln in wrap(c, "Alcohol and hemp/THC regulation — federal and all 50 states. Read it in three minutes or listen in two. Every headline links to the original source.", "OpenSans", 26, 1500):
-        c.drawString(100, y, ln); y -= 42
-    c.setFillColor(GREEN); c.setFont("OpenSans-Bold", 32)
-    c.drawString(100, y - 64, "compliance.newrealmbrewing.com")
-    c.setFillColor(HexColor("#9e9e9e")); c.setFont("OpenSans", 24)
-    c.drawString(100, y - 124, "Subscribe by email, browse the archive, and follow the podcast — link in the first comment.")
-    c.setFillColor(MUTED); c.setFont("OpenSans", 18)
-    c.drawString(100, 84, "For general information only — not legal advice.")
+    lines = ["Every morning", "at 7:00 AM ET."]
+    y = H - 300
+    for ln in lines:
+        c.setFillColor(WHITE); c.setFont("Oswald-Bold", 84); c.drawString(MARGIN, y, ln); y -= 100
+    c.setFillColor(HexColor("#cfcfcf")); c.setFont("OpenSans", 30); y -= 30
+    for ln in wrap(c, "Alcohol and hemp/THC regulation — federal and all 50 states. Read it in three minutes or listen in two.", "OpenSans", 30, W - 2 * MARGIN):
+        c.drawString(MARGIN, y, ln); y -= 46
+    c.setFillColor(GREEN); c.setFont("OpenSans-Bold", 36)
+    c.drawString(MARGIN, y - 60, "compliance.newrealmbrewing.com")
+    c.setFillColor(HexColor("#9e9e9e")); c.setFont("OpenSans", 26)
+    c.drawString(MARGIN, y - 120, "Subscribe, browse the archive, and follow the")
+    c.drawString(MARGIN, y - 160, "podcast — link in the first comment.")
+    c.setFillColor(MUTED); c.setFont("OpenSans", 20)
+    c.drawString(MARGIN, 136, "For general information only — not legal advice.")
     c.showPage()
 
 def main():
@@ -135,7 +160,7 @@ def main():
         item_page(c, e, it, n, len(items))
     cta(c, e)
     c.save()
-    print(f"carousel: {a.out} ({len(items)} item pages + cover + CTA, landscape 16:9)")
+    print(f"carousel: {a.out} ({len(items)} item pages + cover + CTA, poster 4:5)")
 
 if __name__ == "__main__":
     main()
