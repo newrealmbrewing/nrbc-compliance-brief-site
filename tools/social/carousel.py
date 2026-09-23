@@ -97,16 +97,27 @@ def item_page(c, entry, it, idx, total):
     # Title
     hl = clip_lines(wrap(c, it["headline"], "Oswald-Bold", 56, W - 2 * MARGIN), 4)
     y = draw_lines(c, hl, MARGIN, H - 272, "Oswald-Bold", 56, 70, BLACK) - 24
-    # Details paragraph — the item's full summary, sized to read in the feed.
-    if it.get("summary"):
-        lines = clip_lines(wrap(c, it["summary"], "OpenSans", 30, W - 2 * MARGIN), 10)
-        y = draw_lines(c, lines, MARGIN, y - 16, "OpenSans", 30, 44, INK) - 26
-    # Closing takeaway, when the edition carries one.
+    # Vertical budget (2026-09-23): everything must stay above the source line
+    # at y=140 — long summaries were overrunning the takeaway and footer.
+    BOTTOM = 190
+    why_lines = []
     if it.get("why"):
-        lines = clip_lines(wrap(c, "Why it matters: " + it["why"], "OpenSans-Italic", 28, W - 2 * MARGIN - 36), 5)
+        why_lines = clip_lines(wrap(c, "Why it matters: " + it["why"], "OpenSans-Italic", 28, W - 2 * MARGIN - 36), 5)
+    # Details paragraph — the item's full summary, sized to read in the feed,
+    # clipped to the lines that actually fit above the takeaway and source line.
+    if it.get("summary"):
+        why_height = (38 + len(why_lines) * 42 + 8) if why_lines else 0
+        avail = (y - 16) - BOTTOM - why_height - 26
+        max_sum = max(2, int(avail // 44))
+        lines = clip_lines(wrap(c, it["summary"], "OpenSans", 30, W - 2 * MARGIN), min(10, max_sum))
+        y = draw_lines(c, lines, MARGIN, y - 16, "OpenSans", 30, 44, INK) - 26
+    # Closing takeaway, when the edition carries one — re-clipped to remaining space.
+    if why_lines:
+        max_why = max(1, int((y - 38 - BOTTOM) // 42) + 1)
+        why_lines = clip_lines(why_lines, min(5, max_why))
         c.setStrokeColor(GREEN); c.setLineWidth(8)
-        c.line(MARGIN, y - 8, MARGIN, y - 8 - (len(lines) - 1) * 42 - 30)
-        draw_lines(c, lines, MARGIN + 36, y - 38, "OpenSans-Italic", 28, 42, DGREEN)
+        c.line(MARGIN, y - 8, MARGIN, y - 8 - (len(why_lines) - 1) * 42 - 30)
+        draw_lines(c, why_lines, MARGIN + 36, y - 38, "OpenSans-Italic", 28, 42, DGREEN)
     src_line = " • ".join(v for v in [it.get("source", ""), it.get("item_date", "")] if v)
     if src_line:
         c.setFillColor(MUTED); c.setFont("OpenSans", 22); c.drawString(MARGIN, 140, f"Source: {src_line} — link in the email & site edition")
