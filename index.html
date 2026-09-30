@@ -109,6 +109,12 @@
 
   .about { font-size:14px; line-height:1.7; max-width:720px; }
 
+  ul.trackers { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:10px; }
+  ul.trackers a { display:block; background:#ffffff; border-left:4px solid var(--green); padding:16px 18px; text-decoration:none; color:var(--ink); height:100%; }
+  ul.trackers a:hover { background:#f6fff9; }
+  ul.trackers b { display:block; font-family:Oswald,'osw-fb-rc','osw-fb-arial','osw-fb-roboto','osw-fb-noto','osw-fb-dejavu','Arial Narrow',Arial,sans-serif; font-size:18px; color:#000000; margin-bottom:6px; font-weight:700; }
+  ul.trackers span { font-size:13px; color:var(--muted-l); line-height:1.5; }
+
   .controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px; }
   .controls input[type=search] { flex:1 1 200px; min-width:170px; padding:9px 12px; border:1px solid #cfcfcf; border-radius:4px; font-size:14px; font-family:inherit; background:#ffffff; color:var(--ink); }
   .controls input[type=search]:focus { outline:2px solid var(--green); border-color:var(--green); }
@@ -251,6 +257,15 @@
 </section>
 
 <section><div class="wrap">
+  <h2 class="label">Trackers &mdash; The Big Stories, One Page Each</h2>
+  <ul class="trackers">
+    <li><a href="trackers/federal-hemp-ban.html"><b>Federal hemp-THC ban</b><span>Timeline &amp; effective dates &mdash; what changes December 11, 2026, and the path here</span></a></li>
+    <li><a href="trackers/virginia-adult-use.html"><b>Virginia adult-use rollout</b><span>Draft rules, license fees by tier, the 350-store cap, and the road to July 2027</span></a></li>
+    <li><a href="trackers/states.html"><b>Regulation by state</b><span>Every state-level development we&#8217;ve covered, grouped by state and linked to its source</span></a></li>
+  </ul>
+</div></section>
+
+<section><div class="wrap">
   <details class="fold">
   <summary class="label">Browse All Coverage <span class="hint">&mdash; filter by topic, state &amp; keyword</span></summary>
   <div class="controls">
@@ -329,7 +344,7 @@
   <p class="who">Jeremy Barnes <span>|</span> Chief Financial Officer, New Realm Brewing Co.</p>
   <p class="fine">This brief is for general informational purposes only and is not legal advice; it is compiled with AI assistance from the linked sources &mdash; please confirm details at the link before acting on them.</p>
   <p class="links"><a href="https://newrealmbrewing.com">newrealmbrewing.com</a> &bull; <a href="https://www.linkedin.com/company/16222962">LinkedIn</a> &bull; <a href="https://nrbc.transistor.fm">Podcast</a></p>
-  <p class="updated">Updated 2026-09-30 10:50 UTC</p>
+  <p class="updated">Updated 2026-09-30 16:52 UTC</p>
 </div></footer>
 
 <script>
