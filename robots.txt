@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://compliance.newrealmbrewing.com/sitemap.xml
+Sitemap: https://compliance.newrealmbrewing.com/feed.xml
