@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google-site-verification" content="xpLD7tZ9mNgoN6yS7pLZHSdkbXuME0H9bi670NG_j9I">
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESCRIPTION}}">
+<link rel="canonical" href="{{CANONICAL}}">
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{TITLE}}">
+<meta property="og:description" content="{{DESCRIPTION}}">
+<meta property="og:url" content="{{CANONICAL}}">
+<meta property="og:image" content="https://compliance.newrealmbrewing.com/assets/og-banner.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="NRBC Compliance Brief">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="alternate" type="application/rss+xml" title="NRBC Compliance Brief" href="https://compliance.newrealmbrewing.com/feed.xml">
+{{JSONLD}}
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23000000'/%3E%3Ctext x='50' y='68' font-size='52' font-family='Arial' font-weight='bold' fill='%2300B050' text-anchor='middle'%3ENR%3C/text%3E%3C/svg%3E">
+<link rel="preload" href="/assets/fonts/oswald-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/open-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/open-sans-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+  @font-face { font-family:'Open Sans'; font-style:normal; font-weight:400; font-display:optional; src:url(/assets/fonts/open-sans-latin-400-normal.woff2) format('woff2'); }
+  @font-face { font-family:'Open Sans'; font-style:normal; font-weight:600; font-display:optional; src:url(/assets/fonts/open-sans-latin-600-normal.woff2) format('woff2'); }
+  @font-face { font-family:'Open Sans'; font-style:normal; font-weight:700; font-display:optional; src:url(/assets/fonts/open-sans-latin-700-normal.woff2) format('woff2'); }
+  @font-face { font-family:'Open Sans'; font-style:italic; font-weight:400; font-display:optional; src:url(/assets/fonts/open-sans-latin-400-italic.woff2) format('woff2'); }
+  @font-face { font-family:'Oswald'; font-style:normal; font-weight:500; font-display:optional; src:url(/assets/fonts/oswald-latin-500-normal.woff2) format('woff2'); }
+  @font-face { font-family:'Oswald'; font-style:normal; font-weight:700; font-display:optional; src:url(/assets/fonts/oswald-latin-700-normal.woff2) format('woff2'); }
+  @font-face { font-family:'os-fb-arial'; src:local('Arial'),local('Liberation Sans'),local('Helvetica Neue'); size-adjust:104%; ascent-override:107%; descent-override:29%; line-gap-override:0%; }
+  @font-face { font-family:'osw-fb-arial'; src:local('Arial'),local('Liberation Sans'); size-adjust:85.8%; ascent-override:119%; descent-override:29%; line-gap-override:0%; }
+
+  :root { --green:#00B050; --green-l:#007636; --ink:#2b2b2b; --muted:#8a8a8a; --muted-l:#646464; --bg:#ebebeb; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:'Open Sans','os-fb-arial',Arial,Helvetica,sans-serif; }
+  a { color:var(--green-l); }
+  .wrap { max-width:860px; margin:0 auto; padding:0 20px; }
+  .sitenav { background:#000000; padding:14px 20px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; }
+  .sitenav .brand { font-family:Oswald,'osw-fb-arial','Arial Narrow',Arial,sans-serif; font-weight:700; color:#ffffff; font-size:15px; letter-spacing:1px; text-decoration:none; }
+  .sitenav .brand span { color:var(--green); }
+  .sitenav .navlinks { font-size:13px; }
+  .sitenav .navlinks a { color:var(--green); text-decoration:none; margin-left:14px; }
+  .sitenav .navlinks a:hover { text-decoration:underline; }
+
+  header.trk { background:#000000; color:#ffffff; padding:40px 0 34px 0; }
+  .trk .kicker { margin:0 0 8px 0; font-size:12px; text-transform:uppercase; letter-spacing:4px; color:var(--green); font-weight:600; }
+  .trk h1 { margin:0; font-family:Oswald,'osw-fb-arial','Arial Narrow',Arial,sans-serif; font-weight:700; font-size:34px; line-height:1.15; letter-spacing:0.5px; max-width:720px; }
+  .trk p.intro { margin:16px 0 0 0; max-width:640px; font-size:15px; line-height:1.65; color:#d9d9d9; }
+  .trk .upd { margin:14px 0 0 0; font-size:12px; color:#9e9e9e; }
+
+  main { padding:8px 0 20px 0; }
+  section { padding:30px 0 4px 0; }
+  h2.label { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:3px; color:#000000; border-bottom:2px solid #000000; padding-bottom:8px; margin:0 0 18px 0; }
+
+  .timeline { list-style:none; margin:0; padding:0; }
+  .timeline li { background:#ffffff; border-left:4px solid var(--green); padding:16px 20px; margin-bottom:10px; }
+  .timeline li.past { border-left-color:#bdbdbd; }
+  .timeline .tl-date { display:block; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#1e7a3c; margin:0 0 4px 0; }
+  .timeline li.past .tl-date { color:var(--muted-l); }
+  .timeline h3 { margin:0 0 6px 0; font-family:Oswald,'osw-fb-arial','Arial Narrow',Arial,sans-serif; font-size:18px; line-height:1.3; }
+  .timeline p { margin:0; font-size:14px; line-height:1.6; }
+  .timeline p + p { margin-top:8px; }
+
+  .card { background:#ffffff; padding:18px 22px; margin-bottom:10px; font-size:14px; line-height:1.65; }
+  .card h3 { margin:0 0 8px 0; font-family:Oswald,'osw-fb-arial','Arial Narrow',Arial,sans-serif; font-size:18px; }
+  .card ul { margin:8px 0 0 0; padding-left:20px; }
+  .card li { margin-bottom:6px; }
+
+  table.fees { width:100%; border-collapse:collapse; background:#ffffff; font-size:13.5px; }
+  table.fees caption { text-align:left; font-size:12px; color:var(--muted-l); padding:0 0 8px 0; caption-side:top; }
+  table.fees th { background:#000000; color:#ffffff; font-family:Oswald,'osw-fb-arial','Arial Narrow',Arial,sans-serif; font-size:13px; letter-spacing:1px; text-align:left; padding:10px 12px; }
+  table.fees td { border-bottom:1px solid #ececec; padding:10px 12px; vertical-align:top; }
+  table.fees tr:last-child td { border-bottom:none; }
+  table.fees td:first-child { font-weight:600; }
+  .tbl-scroll { overflow-x:auto; }
+
+  ul.items { list-style:none; margin:0; padding:0; }
+  ul.items li { background:#ffffff; border-left:3px solid var(--green); padding:14px 18px; margin-bottom:10px; }
+  .it-meta { font-size:11.5px; color:var(--muted); margin:0 0 4px 0; text-transform:uppercase; letter-spacing:1px; }
+  .it-meta .jur { color:#1e7a3c; font-weight:700; }
+  .it-head { margin:0 0 6px 0; font-family:Oswald,'osw-fb-arial','Arial Narrow',Arial,sans-serif; font-size:17px; line-height:1.3; }
+  .it-head a { color:#000000; text-decoration:none; }
+  .it-head a:hover { color:var(--green-l); }
+  .it-sum { margin:0 0 8px 0; font-size:13.5px; color:var(--ink); }
+  .it-tags { font-size:11.5px; color:var(--muted-l); }
+  .it-tags a { color:var(--green-l); text-decoration:none; font-weight:600; }
+
+  h3.state-h { font-family:Oswald,'osw-fb-arial','Arial Narrow',Arial,sans-serif; font-size:20px; margin:26px 0 10px 0; border-bottom:1px solid #cfcfcf; padding-bottom:6px; }
+  h3.state-h .n { color:var(--muted-l); font-family:'Open Sans','os-fb-arial',Arial,sans-serif; font-size:12px; font-weight:400; }
+  .state-toc { background:#ffffff; padding:14px 18px; font-size:13px; line-height:2; margin-bottom:6px; }
+  .state-toc a { color:var(--green-l); text-decoration:none; font-weight:600; white-space:nowrap; margin-right:12px; }
+  .state-toc a:hover { text-decoration:underline; }
+
+  .note { font-size:12.5px; color:var(--muted-l); line-height:1.6; max-width:720px; }
+  .cta-line { margin:26px 0 0 0; font-size:14px; }
+  .cta-line a.btn { display:inline-block; padding:10px 18px; border-radius:4px; font-size:13px; font-weight:700; text-decoration:none; background:var(--green); color:#000000; }
+
+  footer { background:#000000; margin-top:44px; padding:28px 0 34px 0; }
+  footer .who { font-family:Oswald,'osw-fb-arial','Arial Narrow',Arial,sans-serif; color:#ffffff; font-size:14px; margin:0 0 12px 0; }
+  footer .who span { color:var(--green); }
+  footer .fine { color:#8a8a8a; font-size:11px; line-height:1.6; max-width:680px; margin:0 0 14px 0; }
+  footer .links { font-size:12px; color:#8a8a8a; }
+  footer .links a { color:var(--green); text-decoration:none; font-weight:600; }
+  @media (max-width:560px){ .trk h1{font-size:27px;} }
+</style>
+</head>
+<body>
+<nav class="sitenav">
+  <a class="brand" href="/">NEW REALM BREWING <span>&mdash;</span> COMPLIANCE BRIEF</a>
+  <span class="navlinks">{{NAV_LINKS}}</span>
+</nav>
+<header class="trk"><div class="wrap">
+  <p class="kicker">{{KICKER}}</p>
+  <h1>{{H1}}</h1>
+  <p class="intro">{{INTRO}}</p>
+  <p class="upd">Last updated {{UPDATED}} &bull; Maintained daily by the <a href="/" style="color:#00B050;text-decoration:none;">NRBC Compliance Brief</a></p>
+</div></header>
+<main>
+{{CONTENT}}
+<section><div class="wrap">
+  <p class="cta-line"><a class="btn" href="mailto:jbarnes@newrealmbrewing.com?subject=Subscribe%20-%20Compliance%20Brief&body=Please%20add%20me%20to%20the%20New%20Realm%20Compliance%20Brief%20distribution%20list.">Get the daily brief by email &mdash; free</a></p>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <p class="who">Jeremy Barnes <span>|</span> Chief Financial Officer, New Realm Brewing Co.</p>
+  <p class="fine">This page is for general informational purposes only and is not legal advice; it is compiled with AI assistance from the linked sources &mdash; please confirm details at the link before acting on them. Regulatory details change; where this page and an official source differ, the official source governs.</p>
+  <p class="links"><a href="/">All editions</a> &bull; <a href="https://newrealmbrewing.com">newrealmbrewing.com</a> &bull; <a href="https://nrbc.transistor.fm">Podcast</a> &bull; <a href="/feed.xml">RSS</a></p>
+</div></footer>
+</body>
+</html>
