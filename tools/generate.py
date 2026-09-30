@@ -406,18 +406,190 @@ def write_feed(manifest, max_entries=20):
 
 
 def write_sitemap(manifest):
-    """sitemap.xml: landing page plus every edition page (SEO pass 2026-09-02)."""
+    """sitemap.xml: landing page, tracker pages, every edition page
+    (SEO pass 2026-09-02; trackers added 2026-09-30)."""
     latest = max((e["date"] for e in manifest), default=None)
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     if latest:
         lines.append(f"<url><loc>{SITE}/</loc><lastmod>{latest}</lastmod><changefreq>daily</changefreq></url>")
+        for t in TRACKERS:
+            lines.append(f"<url><loc>{SITE}/trackers/{t['slug']}.html</loc>"
+                         f"<lastmod>{latest}</lastmod><changefreq>daily</changefreq></url>")
     for e in sorted(manifest, key=lambda x: x["date"]):
         lines.append(f"<url><loc>{SITE}/editions/{e['date']}.html</loc><lastmod>{e['date']}</lastmod></url>")
     lines.append("</urlset>")
     with open(p("sitemap.xml"), "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
-    return len(manifest) + (1 if latest else 0)
+    return len(manifest) + (1 + len(TRACKERS) if latest else 0)
+
+
+# ---------------------------------------------------------------------------
+# Tracker pages (2026-09-30): evergreen reference pages regenerated on every
+# run so their "coverage from the brief" sections and last-updated dates stay
+# current. Static narrative/timeline content lives in
+# templates/trackers/<slug>.content.html with a {{RELATED_ROWS}} placeholder;
+# the states index is built entirely from items.json.
+
+TRACKERS = [
+    {
+        "slug": "federal-hemp-ban",
+        "kicker": "Federal Tracker",
+        "h1": "Federal Hemp-THC Ban: Timeline & Effective Dates",
+        "title": "Federal Hemp THC Ban Tracker — December 11, 2026 Effective Date, Timeline & What Changes",
+        "description": ("Tracking the federal hemp redefinition: products over 0.4 mg total THC per "
+                        "container lose federal hemp status on December 11, 2026 (delayed from November 12 "
+                        "by H.R. 6500). Timeline, what changes, and daily coverage — updated every morning."),
+        "intro": ("The one-page status of the federal hemp-THC restrictions: what the law changes, "
+                  "when it takes effect, and every related development covered by the daily brief."),
+        "filter": lambda it: ("Federal" in it.get("jurisdictions", [])
+                              and "Hemp & THC" in it.get("topics", [])),
+    },
+    {
+        "slug": "virginia-adult-use",
+        "kicker": "Virginia Tracker",
+        "h1": "Virginia Adult-Use Cannabis Rollout: Rules, Fees & Key Dates",
+        "title": "Virginia Adult-Use Cannabis Tracker — License Fees, 350-Store Cap, February 2027 Applications",
+        "description": ("Tracking Virginia's adult-use retail rollout: the CCA's draft regulations, the "
+                        "license fee schedule by tier, the 350-store cap, December 2026 final rules, "
+                        "February 1, 2027 applications and the July 1, 2027 launch — updated daily."),
+        "intro": ("The one-page status of Virginia's adult-use retail market: the draft rules, the fee "
+                  "schedule, the application calendar, and every Virginia development covered by the "
+                  "daily brief — including the state's separate 2 mg hemp-THC cap."),
+        "filter": lambda it: "Virginia" in it.get("jurisdictions", []),
+    },
+    {
+        "slug": "states",
+        "kicker": "50-State Index",
+        "h1": "Alcohol & Hemp/THC Regulation by State",
+        "title": "State-by-State Alcohol & Hemp THC Regulation Index — Laws, Rules & Enforcement",
+        "description": ("A state-by-state index of alcohol and hemp/THC beverage regulatory developments — "
+                        "laws, licensing, fees, court rulings and enforcement — as covered by the NRBC "
+                        "Compliance Brief, with every item linked to its original source. Updated daily."),
+        "intro": ("Every state-level development the daily brief has covered, grouped by state, newest "
+                  "first — laws, licensing and fees, court rulings, and enforcement, each linked to its "
+                  "original source."),
+        "filter": None,  # body is generated from items.json
+    },
+]
+
+TRACKER_NAV = ('<a href="/trackers/federal-hemp-ban.html">Federal hemp ban</a>'
+               '<a href="/trackers/virginia-adult-use.html">Virginia rollout</a>'
+               '<a href="/trackers/states.html">By state</a>'
+               '<a href="/">All editions</a>')
+
+MAX_TRACKER_ITEMS = 40
+MAX_STATE_ITEMS = 12
+
+
+def item_row(it):
+    """One coverage item, matching the homepage Browse card markup."""
+    jur = html_mod.escape(" / ".join(it.get("jurisdictions", [])))
+    src = html_mod.escape(it.get("source", ""))
+    idate = html_mod.escape(it.get("item_date", ""))
+    meta = f'<span class="jur">{jur}</span> &bull; {src}' + (f" &bull; {idate}" if idate else "")
+    summary = html_mod.escape(it.get("summary", ""))
+    if len(summary) > 360:
+        summary = summary[:357].rstrip() + "&hellip;"
+    sum_html = f'<p class="it-sum">{summary}</p>' if summary else ""
+    return ("<li>"
+            f'<p class="it-meta">{meta}</p>'
+            f'<h3 class="it-head"><a href="{html_mod.escape(it["url"])}" rel="noopener">'
+            f'{html_mod.escape(it["headline"])}</a></h3>'
+            f"{sum_html}"
+            f'<p class="it-tags"><a href="/{it["edition_page"]}">From Vol. {it["vol"]}, '
+            f'Ed. {it["ed"]} &mdash; {short_date(it["date"])} &rarr;</a></p>'
+            "</li>")
+
+
+def related_rows(items, flt, cap=MAX_TRACKER_ITEMS):
+    hits = sorted((i for i in items if flt(i)), key=lambda i: i["date"], reverse=True)
+    if not hits:
+        return '<li><p class="it-sum">No coverage yet — new items appear here automatically.</p></li>'
+    return "\n".join(item_row(i) for i in hits[:cap])
+
+
+def states_body(items):
+    """The 50-state index body: a state TOC plus per-state item lists."""
+    by_state = {}
+    for it in items:
+        for j in it.get("jurisdictions", []):
+            if j.upper() in US_STATES:
+                by_state.setdefault(j, []).append(it)
+    names = sorted(by_state)
+    toc = "".join(f'<a href="#{n.lower().replace(" ", "-")}">{html_mod.escape(n)}</a> '
+                  for n in names)
+    parts = ['<section><div class="wrap">',
+             '<h2 class="label">Jump to a State</h2>',
+             f'<p class="state-toc">{toc}</p>',
+             '<p class="note">States appear once the brief has covered a development there; '
+             'the newest items are shown for each state (the <a href="/">homepage Browse '
+             'section</a> filters the full archive by state, topic and keyword).</p>',
+             '</div></section>',
+             '<section><div class="wrap">',
+             '<h2 class="label">Coverage by State</h2>']
+    for n in names:
+        sid = n.lower().replace(" ", "-")
+        rows = sorted(by_state[n], key=lambda i: i["date"], reverse=True)
+        shown = rows[:MAX_STATE_ITEMS]
+        more = (f'<p class="note" style="margin:6px 0 0 0;">{len(rows) - len(shown)} earlier '
+                f'{n} item(s) are in the <a href="/">archive</a>.</p>'
+                if len(rows) > len(shown) else "")
+        parts.append(f'<h3 class="state-h" id="{sid}">{html_mod.escape(n)} '
+                     f'<span class="n">&mdash; {len(rows)} item(s) covered</span></h3>')
+        parts.append('<ul class="items">' + "\n".join(item_row(i) for i in shown) + "</ul>" + more)
+    parts.append("</div></section>")
+    return "\n".join(parts)
+
+
+def tracker_jsonld(t, latest_date):
+    data = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage" if t["slug"] == "states" else "Article",
+        "headline": t["h1"],
+        "description": t["description"],
+        "dateModified": edition_published_iso(latest_date) if latest_date else None,
+        "mainEntityOfPage": f"{SITE}/trackers/{t['slug']}.html",
+        "isAccessibleForFree": True,
+        "author": {"@type": "Organization", "name": "New Realm Brewing",
+                   "url": "https://newrealmbrewing.com"},
+        "publisher": {"@type": "Organization", "name": "New Realm Brewing",
+                      "logo": {"@type": "ImageObject", "url": f"{SITE}/assets/og-banner.png"}},
+        "isPartOf": {"@type": "WebSite", "name": "NRBC Compliance Brief", "url": SITE + "/"},
+    }
+    data = {k: v for k, v in data.items() if v is not None}
+    payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+    return f'<script type="application/ld+json">{payload}</script>'
+
+
+def write_trackers(manifest, items):
+    with open(p("templates", "tracker.template.html"), encoding="utf-8") as f:
+        tpl = f.read()
+    latest = max((e["date"] for e in manifest), default=None)
+    os.makedirs(p("trackers"), exist_ok=True)
+    for t in TRACKERS:
+        if t["filter"] is not None:
+            content_path = p("templates", "trackers", f"{t['slug']}.content.html")
+            with open(content_path, encoding="utf-8") as f:
+                content = f.read()
+            content = content.replace("{{RELATED_ROWS}}", related_rows(items, t["filter"]))
+        else:
+            content = states_body(items)
+        page = render(tpl, {
+            "TITLE": html_mod.escape(t["title"]),
+            "DESCRIPTION": html_mod.escape(t["description"]),
+            "CANONICAL": f"{SITE}/trackers/{t['slug']}.html",
+            "JSONLD": tracker_jsonld(t, latest),
+            "NAV_LINKS": TRACKER_NAV,
+            "KICKER": t["kicker"],
+            "H1": html_mod.escape(t["h1"]),
+            "INTRO": t["intro"],
+            "UPDATED": pretty_date(latest) if latest else "",
+            "CONTENT": content,
+        })
+        with open(p("trackers", f"{t['slug']}.html"), "w", encoding="utf-8") as f:
+            f.write(page)
+    print(f"trackers: {len(TRACKERS)} pages regenerated")
 
 
 def edition_nav(entry, manifest):
@@ -644,6 +816,7 @@ def main():
         all_items.sort(key=lambda i: (i["date"], {"top": 0, "federal": 1, "states": 2}[i["section"]]))
         save_json("items.json", all_items)
     build_index(manifest)
+    write_trackers(manifest, load_json("items.json", []))
     n_urls = write_sitemap(manifest)
     n_feed = write_feed(manifest)
     print(f"feed: feed.xml ({n_feed} entries)")
