@@ -5127,5 +5127,88 @@
    "Taxes & Revenue"
   ],
   "edition_page": "editions/2026-10-13.html"
+ },
+ {
+  "date": "2026-10-14",
+  "vol": 1,
+  "ed": 62,
+  "section": "top",
+  "jurisdictions": [
+   "U.S. Supreme Court",
+   "Ohio"
+  ],
+  "source": "Wine Industry Advisor",
+  "item_date": "Oct 13",
+  "headline": "Supreme Court declines to review Ohio wine-shipping case, leaving retailer DTC ruling in place",
+  "url": "https://wineindustryadvisor.com/2026/10/13/afternoon-brief-3207/",
+  "summary": "The Supreme Court on Tuesday denied, without comment , the Ohio attorney general's petition (No. 25-1366) seeking review of Block v. Canepa , the Sixth Circuit's May decision holding that Ohio's ban on direct-to-consumer shipments by out-of-state wine retailers violates the dormant Commerce Clause while in-state retailers and out-of-state wineries may ship. The denial is not a merits ruling, but it leaves the Sixth Circuit decision standing and returns the case to the Southern District of Ohio to craft a remedy. Federal appeals courts remain split on retailer shipping, so requirements continue to differ by circuit.",
+  "why": "Once the district court sets a remedy, out-of-state retailers may gain a lawful route to ship wine into Ohio — a new channel competing with in-state retail accounts — while rules in other states are unchanged because the circuit split stays unresolved.",
+  "topics": [
+   "Alcohol",
+   "Courts & Lawsuits",
+   "DTC & Distribution"
+  ],
+  "edition_page": "editions/2026-10-14.html"
+ },
+ {
+  "date": "2026-10-14",
+  "vol": 1,
+  "ed": 62,
+  "section": "federal",
+  "jurisdictions": [
+   "Federal"
+  ],
+  "source": "Marijuana Moment",
+  "item_date": "Oct 13",
+  "headline": "DEA defers on adding GAO report to rescheduling record but opposes a new round of briefing",
+  "url": "https://www.marijuanamoment.net/dea-is-ok-with-including-new-report-in-marijuana-rescheduling-hearing-as-opponents-seek-new-testimony-and-document-discovery/",
+  "summary": "In the paused marijuana rescheduling hearing, DEA told Chief Administrative Law Judge Derek Julius it defers to him on whether a Government Accountability Office report — which found DEA and FDA lack written procedures for scheduling evaluations — should enter the record, while opposing opponents' request for added briefing; DEA said the report identifies gaps in documentation rather than flaws in the process. Smart Approaches to Marijuana, joined by Idaho, Indiana and Nebraska, filed in support of admitting the report, and NDASA asked for a narrow reopening with limited discovery and testimony.",
+  "why": "The judge's call on reopening discovery will determine whether the Schedule III timeline — and the DEA registration regime that depends on it — slips further.",
+  "topics": [
+   "Hemp & THC",
+   "Courts & Lawsuits"
+  ],
+  "edition_page": "editions/2026-10-14.html"
+ },
+ {
+  "date": "2026-10-14",
+  "vol": 1,
+  "ed": 62,
+  "section": "states",
+  "jurisdictions": [
+   "Massachusetts"
+  ],
+  "source": "Office of the State Auditor",
+  "item_date": "Oct 13",
+  "headline": "Massachusetts auditor recommends ending the state's on-premises liquor-license quota",
+  "url": "https://www.mass.gov/news/state-auditors-report-identifies-barriers-in-massachusetts-liquor-license-process",
+  "summary": "License structure watch: the State Auditor's \"License to Pour\" report recommends the Legislature eliminate the 1933 population-based quota on on-premises retail (restaurant and bar) licenses — a recommendation, not an enacted change — and shift to local control with a public statewide licensing data platform. The report says the quota creates artificial shortages affecting about 2.5 million residents and a costly resale market: owners reported paying about $600,000 for a license in Boston and $175,000 in Somerville, versus roughly $2,500 in Cambridge, which controls its own licensing. No fee schedule changes for manufacturers or distributors are proposed.",
+  "why": "If adopted, local control would cut six-figure entry costs for new on-premises accounts in quota-bound towns — expanding the licensed account base for distributors — while existing licenses' resale values would likely fall.",
+  "topics": [
+   "Alcohol",
+   "Licensing",
+   "DTC & Distribution"
+  ],
+  "edition_page": "editions/2026-10-14.html"
+ },
+ {
+  "date": "2026-10-14",
+  "vol": 1,
+  "ed": 62,
+  "section": "states",
+  "jurisdictions": [
+   "South Dakota"
+  ],
+  "source": "Marijuana Moment",
+  "item_date": "Oct 13",
+  "headline": "South Dakota attorney general: rescheduling would have \"negligible\" effect on state medical program",
+  "url": "https://www.marijuanamoment.net/federal-marijuana-rescheduling-will-have-negligible-impact-on-south-dakotas-medical-marijuana-program-attorney-general-says/",
+  "summary": "In a formal opinion requested by the Legislature's Medical Marijuana Oversight Committee, Attorney General Marty Jackley said moving marijuana to Schedule III would likely have a negligible impact on the state's medical program, reasoning that federal law has not preempted state regulation and that state-licensed operators can continue by registering with DEA under the agency's April rule.",
+  "why": "",
+  "topics": [
+   "Hemp & THC",
+   "Licensing"
+  ],
+  "edition_page": "editions/2026-10-14.html"
  }
 ]
