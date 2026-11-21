@@ -8683,5 +8683,90 @@
    "Taxes & Revenue"
   ],
   "edition_page": "editions/2026-11-20.html"
+ },
+ {
+  "date": "2026-11-21",
+  "vol": 1,
+  "ed": 100,
+  "section": "top",
+  "jurisdictions": [
+   "Illinois"
+  ],
+  "source": "WAND-TV",
+  "item_date": "Nov 20",
+  "headline": "Federal judge declines to block Illinois law limiting hemp THC sales to licensed dispensaries",
+  "url": "https://www.wandtv.com/2026/11/20/judge-denies-illinois-hemp-businesses-request-temporarily-block-law/",
+  "summary": "U.S. District Judge Martha Pacold on Thursday denied, without prejudice, an emergency request by the Illinois Healthy Alternatives Association — a trade group it says represents about 250 hemp farmers, manufacturers, distributors and retailers — and several businesses to block the state's new hemp law, which reclassifies products containing more than 0.4 milligrams of THC as cannabis and bars their sale outside licensed dispensaries. The law took effect November 19. Plaintiffs' attorney Michael Rothstein argued the restrictions conflict with federal law, which treats the products as legal hemp until next month; Assistant Attorney General Richard Huszagh said the state may restrict the sales for public health reasons. The parties are expected back in court December 15, and the association said it is exploring appellate review.",
+  "why": "As of November 19, retail partners in Illinois cannot sell hemp-derived THC beverages outside licensed cannabis dispensaries — the judge noted sellers would need to apply for a cannabis license — so affected SKUs should come off convenience, grocery and liquor-store sets while the litigation continues.",
+  "topics": [
+   "Hemp & THC",
+   "Courts & Lawsuits",
+   "Licensing",
+   "DTC & Distribution"
+  ],
+  "edition_page": "editions/2026-11-21.html"
+ },
+ {
+  "date": "2026-11-21",
+  "vol": 1,
+  "ed": 100,
+  "section": "federal",
+  "jurisdictions": [
+   "Federal"
+  ],
+  "source": "Brewers Association",
+  "item_date": "Nov 20",
+  "headline": "FDA draft guidance would ease food-traceability recordkeeping for brewpubs and taprooms",
+  "url": "https://www.brewersassociation.org/government-affairs-updates/fda-draft-guidance-food-traceability-relief-for-breweries",
+  "summary": "FDA issued draft guidance saying it would decline to enforce Food Traceability Rule requirements against retail food establishments and restaurants — including qualifying brewpubs and taprooms that serve food — with average annual food sales above $250,000 but no more than $1 million over the prior three years (both thresholds inflation-adjusted from a 2020 baseline); locations at or below the lower threshold are already exempt. The Brewers Association estimates roughly 2,300 to 2,900 brewing locations could qualify, and FDA has said it will not enforce the rule before July 20, 2028.",
+  "why": "Qualifying brewpub and taproom locations would avoid the rule's traceability lot-code recordkeeping; the draft is open for comment on docket FDA-2025-D-6952 before it is finalized.",
+  "topics": [
+   "Alcohol",
+   "Courts & Lawsuits",
+   "Enforcement & Recalls",
+   "Rulemaking & Guidance"
+  ],
+  "edition_page": "editions/2026-11-21.html"
+ },
+ {
+  "date": "2026-11-21",
+  "vol": 1,
+  "ed": 100,
+  "section": "federal",
+  "jurisdictions": [
+   "Federal"
+  ],
+  "source": "Marijuana Moment",
+  "item_date": "Nov 19",
+  "headline": "Medical cannabis companies ask D.C. Circuit to halt DEA supply-chain directive before Nov. 29 deadline",
+  "url": "https://www.marijuanamoment.net/medical-marijuana-companies-sue-dea-in-federal-court-over-restrictions-it-imposed-for-rescheduling-protections/",
+  "summary": "Three state-licensed medical cannabis companies filed a petition for review in the U.S. Court of Appeals for the D.C. Circuit challenging DEA's October 30 directive, which tells federally registered applicants to verify trading partners' registration status and adjust supply chains by November 29. The petitioners say the directive conflicts with April's rescheduling order, was issued without notice and comment, and did not weigh reliance interests; they asked the court to rule or stay the directive by November 25.",
+  "why": "Federally registered cannabis businesses and their trading partners face the November 29 verification deadline unless the court intervenes — distributors working with registered operators should confirm partner status this week.",
+  "topics": [
+   "Hemp & THC",
+   "Courts & Lawsuits",
+   "Licensing"
+  ],
+  "edition_page": "editions/2026-11-21.html"
+ },
+ {
+  "date": "2026-11-21",
+  "vol": 1,
+  "ed": 100,
+  "section": "states",
+  "jurisdictions": [
+   "Alabama"
+  ],
+  "source": "WAFF 48",
+  "item_date": "Nov 19",
+  "headline": "Alabama ABC Board says liquor distribution backlog nearly cleared; senator preparing privatization bill",
+  "url": "https://waff.com/2026/11/20/alabamas-abc-board-reports-progress-liquor-distribution-challenges",
+  "summary": "Alabama's ABC Board said the shipping backlog tied to its move to a new Montgomery warehouse has fallen from 11 days to two, with the facility shipping 16,300 to 22,000 cases per day, and said it expects to be fully caught up by early December. Separately, state Sen. Arthur Orr said he is preparing legislation for the session convening in February 2027 that would gradually move the state's government-run liquor distribution and ABC retail stores to private businesses.",
+  "why": "Alabama on-premise and retail accounts should see spirits fill rates normalize ahead of the holiday rush, and a privatization bill would restructure how partners source spirits in one of the states with government-run distribution.",
+  "topics": [
+   "Alcohol",
+   "DTC & Distribution"
+  ],
+  "edition_page": "editions/2026-11-21.html"
  }
 ]
